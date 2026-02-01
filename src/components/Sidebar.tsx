@@ -90,8 +90,8 @@ export default function Sidebar() {
       </div>
 
       {/* User Profile */}
-      <div className={`mt-10 ${isExpanded ? "w-full" : ""}`}>
-        <div className={`flex items-center gap-3 ${isExpanded ? "p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors" : ""}`}>
+      <div className={`mt-10 ${isExpanded ? "w-full" : "w-full flex justify-center"}`}>
+        <a href="/profile" className={`flex items-center gap-3 ${isExpanded ? "p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors" : ""}`}>
           <div className="w-12 h-12 rounded-full bg-[#E5EDFF] flex items-center justify-center text-[#4A72FF] font-semibold text-sm cursor-pointer border-2 border-white shadow-sm flex-shrink-0">
             JD
           </div>
@@ -101,7 +101,7 @@ export default function Sidebar() {
               <p className="text-gray-400 text-xs">Administrator</p>
             </div>
           )}
-        </div>
+        </a>
       </div>
     </aside>
   );
