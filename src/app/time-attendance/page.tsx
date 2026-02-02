@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Calendar, FileText, FileCheck, Settings, SlidersHorizontal, MoreHorizontal, Check } from "lucide-react";
 import Link from "next/link";
 
@@ -10,7 +10,7 @@ interface Employee {
   role: string;
   avatarColor: string;
   type: string;
-  regular: number;
+  regular: number | null;
   overtime: number | null;
   sickLeave: number | null;
   pto: number | null;
@@ -18,16 +18,6 @@ interface Employee {
   totalHour: number;
   approvedBy?: string;
 }
-
-const employees: Employee[] = [
-  { id: "1", name: "Ralph Edwards", role: "Product Designer", avatarColor: "bg-yellow-500", type: "Fulltime", regular: 172, overtime: 24, sickLeave: 48, pto: null, paidHoliday: 20, totalHour: 264, approvedBy: undefined },
-  { id: "2", name: "Arlene McCoy", role: "UX Researcher", avatarColor: "bg-orange-500", type: "Fulltime", regular: 160, overtime: null, sickLeave: null, pto: 50, paidHoliday: null, totalHour: 210, approvedBy: undefined },
-  { id: "3", name: "Wade Warren", role: "QA Engineer", avatarColor: "bg-amber-600", type: "Contractor", regular: 178, overtime: null, sickLeave: null, pto: 74, paidHoliday: null, totalHour: 252, approvedBy: undefined },
-  { id: "4", name: "Jacob Jones", role: "Senior UI Designer", avatarColor: "bg-green-600", type: "Fulltime", regular: 156, overtime: 16, sickLeave: 24, pto: null, paidHoliday: 40, totalHour: 236, approvedBy: "Sonia W" },
-  { id: "5", name: "Jenny Wilson", role: "Java Developer", avatarColor: "bg-blue-500", type: "Fulltime", regular: 174, overtime: null, sickLeave: null, pto: 64, paidHoliday: null, totalHour: 238, approvedBy: "Sonia W" },
-  { id: "6", name: "Rudolp Wayne", role: "Visual Basic Programmer", avatarColor: "bg-red-500", type: "Contractor", regular: 163, overtime: 32, sickLeave: null, pto: 100, paidHoliday: null, totalHour: 295, approvedBy: "Sonia W" },
-  { id: "7", name: "Jennifer Kwok", role: "Frontend Developer", avatarColor: "bg-orange-400", type: "Fulltime", regular: 162, overtime: null, sickLeave: null, pto: 50, paidHoliday: null, totalHour: 212, approvedBy: undefined },
-];
 
 const tabs = [
   { id: "timesheet", label: "Timesheet", icon: Calendar },
@@ -38,6 +28,34 @@ const tabs = [
 export default function TimeAttendancePage() {
   const [activeTab, setActiveTab] = useState("timesheet");
   const [searchQuery, setSearchQuery] = useState("");
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch employees from API
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch("/api/attendance");
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch employee data");
+        }
+        
+        const data = await response.json();
+        setEmployees(data);
+        setError(null);
+      } catch (err: any) {
+        console.error("Error fetching employees:", err);
+        setError(err.message || "Failed to load employee data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
 
   const filteredEmployees = employees.filter(emp =>
     emp.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -163,8 +181,30 @@ export default function TimeAttendancePage() {
         </div>
       </div>
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#F7D046]"></div>
+          <p className="mt-4 text-gray-500">Loading employees...</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !isLoading && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+          <p className="text-red-600 font-medium">⚠️ {error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* Employee Table */}
-      <div className="bg-white border-t border-gray-200">
+      {!isLoading && !error && (
+        <div className="bg-white border-t border-gray-200">
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-100">
@@ -207,12 +247,12 @@ export default function TimeAttendancePage() {
                     <p className="text-xs text-gray-400">Salaried</p>
                   </div>
                 </td>
-                <td className="px-4 py-4 text-sm font-medium text-[#2C2C2C]">{employee.regular} Hours</td>
+                <td className="px-4 py-4 text-sm font-medium text-[#2C2C2C]">{employee.regular ? `${employee.regular} Hours` : "-"}</td>
                 <td className="px-4 py-4 text-sm font-medium text-[#2C2C2C]">{employee.overtime ? `${employee.overtime} Hours` : "-"}</td>
                 <td className="px-4 py-4 text-sm font-medium text-[#2C2C2C]">{employee.sickLeave ? `${employee.sickLeave} Hours` : "-"}</td>
                 <td className="px-4 py-4 text-sm font-medium text-[#2C2C2C]">{employee.pto ? `${employee.pto} Hours` : "-"}</td>
                 <td className="px-4 py-4 text-sm font-medium text-[#2C2C2C]">{employee.paidHoliday ? `${employee.paidHoliday} Hours` : "-"}</td>
-                <td className="px-4 py-4 text-sm font-bold text-[#2C2C2C]">{employee.totalHour} Hours</td>
+                <td className="px-4 py-4 text-sm font-bold text-[#2C2C2C]">{employee.totalHour > 0 ? `${employee.totalHour} Hours` : "-"}</td>
                 <td className="px-4 py-4">
                   <div className="flex items-center gap-2 justify-end">
                     {employee.approvedBy ? (
@@ -233,7 +273,8 @@ export default function TimeAttendancePage() {
             ))}
           </tbody>
         </table>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

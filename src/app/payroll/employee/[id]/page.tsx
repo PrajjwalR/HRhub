@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Calendar, Clock, FileText, LayoutList, Check, X, Edit2 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -20,22 +20,22 @@ interface TimeEntry {
   timeoffInfo?: { approvedBy: string; type: string; approvedOn: string; duration: number };
 }
 
-const employeeData = {
-  id: "1",
-  name: "Ralph Edwards",
-  role: "Product Designer",
-  type: "Hourly",
-  avatar: "",
-  avatarColor: "bg-yellow-500",
-  totalHours: 264.00,
-  regular: 172,
-  overtime: 24.00,
-  pto: 0.00,
-  holiday: 20.00,
-  approved: 132,
-  rejected: 40,
-  pending: 10,
-};
+interface EmployeeData {
+  id: string;
+  name: string;
+  role: string;
+  type: string;
+  avatar: string;
+  avatarColor: string;
+  totalHours: number;
+  regular: number | null;
+  overtime: number | null;
+  pto: number | null;
+  holiday: number | null;
+  approved: number;
+  rejected: number;
+  pending: number;
+}
 
 const timeEntries: TimeEntry[] = [
   { id: "1", dayOfWeek: "Mon", date: "1st Jun 2022", checkin: "09:00 AM", checkout: "09:00 PM", mealBreak: { hours: 1, time: "12:00 PM - 01:00 PM" }, workHours: 8, overtime: 4, double: "N/A", note: "", status: "pending" },
@@ -50,13 +50,94 @@ const timeEntries: TimeEntry[] = [
 
 export default function EmployeeDetailPage() {
   const params = useParams();
+  const employeeId = params.id as string;
+  
   const [activeTab, setActiveTab] = useState<"timecard" | "timeline">("timecard");
   const [showOnlyUnapproved, setShowOnlyUnapproved] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [employeeData, setEmployeeData] = useState<EmployeeData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch employee data
+  useEffect(() => {
+    const fetchEmployee = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch("/api/attendance");
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch employee data");
+        }
+        
+        const employees = await response.json();
+        const employee = employees.find((emp: any) => emp.id === employeeId);
+        
+        if (!employee) {
+          throw new Error("Employee not found");
+        }
+        
+        // Transform to EmployeeData format
+        setEmployeeData({
+          id: employee.id,
+          name: employee.name,
+          role: employee.role,
+          type: employee.type,
+          avatar: "",
+          avatarColor: employee.avatarColor,
+          totalHours: employee.totalHour || 0,
+          regular: employee.regular,
+          overtime: employee.overtime,
+          pto: employee.pto,
+          holiday: employee.paidHoliday,
+          approved: 0,
+          rejected: 0,
+          pending: 0,
+        });
+        setError(null);
+      } catch (err: any) {
+        console.error("Error fetching employee:", err);
+        setError(err.message || "Failed to load employee data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (employeeId) {
+      fetchEmployee();
+    }
+  }, [employeeId]);
 
   const filteredEntries = showOnlyUnapproved 
     ? timeEntries.filter(e => e.status === "pending")
     : timeEntries;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#F7D046] mb-4"></div>
+          <p className="text-gray-500">Loading employee data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !employeeData) {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 font-medium mb-4">⚠️ {error || "Employee not found"}</p>
+          <Link 
+            href="/time-attendance"
+            className="px-4 py-2 bg-[#F7D046] text-[#2C2C2C] rounded hover:bg-[#E5C03E] transition-colors inline-block"
+          >
+            Back to Time & Attendance
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">

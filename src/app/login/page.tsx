@@ -9,15 +9,23 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
-    const success = login(email, password);
-    if (!success) {
-      setError("Invalid email or password");
+    try {
+      const success = await login(email, password);
+      if (!success) {
+        setError("Invalid email or password");
+      }
+    } catch (err) {
+      setError("Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -99,9 +107,10 @@ export default function LoginPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-[#4A72FF] text-white py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-200"
+              disabled={isLoading}
+              className="w-full bg-[#4A72FF] text-white py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {isLoading ? "Signing in..." : "Sign In"}
             </button>
           </form>
 
