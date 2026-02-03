@@ -1,54 +1,105 @@
 "use client";
 
-import { Clock, Plus, ChevronDown, Edit2 } from "lucide-react";
+import { Clock, Plus, ChevronDown, Edit2, FileText } from "lucide-react";
 import { useState } from "react";
 import OvertimeModal from "./OvertimeModal";
-
-interface Employee {
-  id: string;
-  name: string;
-  avatarColor: string;
-  salary: string;
-  totalHours: number;
-  overtime: number | null;
-  additionalEarnings: string | null;
-  totalPay: number;
-  paymentType: string;
-}
+import NoteModal from "./NoteModal";
+import { WizardEmployee } from "@/app/payroll/wizard/page";
 
 interface Step2TotalHoursProps {
+  employees: WizardEmployee[];
+  onUpdateEmployees: (employees: WizardEmployee[]) => void;
   onNext: () => void;
   onPrevious: () => void;
   onCancel: () => void;
 }
 
-const initialEmployees: Employee[] = [
-  { id: "1", name: "Ralph Edwards", avatarColor: "bg-yellow-500", salary: "$89,000/Year", totalHours: 172, overtime: 24, additionalEarnings: "Reimbursement", totalPay: 8500, paymentType: "Direct deposit" },
-  { id: "2", name: "Arlene McCoy", avatarColor: "bg-orange-500", salary: "$24,000/year", totalHours: 160, overtime: null, additionalEarnings: null, totalPay: 2000, paymentType: "Direct deposit" },
-  { id: "3", name: "Wade Warren", avatarColor: "bg-yellow-600", salary: "$24,000/year", totalHours: 178, overtime: null, additionalEarnings: null, totalPay: 2000, paymentType: "Direct deposit" },
-  { id: "4", name: "Jacob Jones", avatarColor: "bg-amber-600", salary: "$24,000/year", totalHours: 156, overtime: 16, additionalEarnings: null, totalPay: 2500, paymentType: "Direct deposit" },
-  { id: "5", name: "Jenny Wilson", avatarColor: "bg-blue-500", salary: "$24,000/year", totalHours: 174, overtime: null, additionalEarnings: "Reimbursement", totalPay: 2000, paymentType: "Direct deposit" },
-  { id: "6", name: "Rudolp Wayne", avatarColor: "bg-red-500", salary: "$24,000/year", totalHours: 163, overtime: 32, additionalEarnings: "Reimbursement", totalPay: 2800, paymentType: "Direct deposit" },
+const paymentTypeOptions = [
+  "Direct Deposit",
+  "Check",
+  "Wire Transfer",
+  "Cash",
 ];
 
-export default function Step2TotalHours({ onNext, onPrevious, onCancel }: Step2TotalHoursProps) {
-  const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const additionalEarningsTypes = [
+  "",
+  "Reimbursement",
+  "Bonus",
+  "Commission",
+  "Allowance",
+];
+
+export default function Step2TotalHours({ employees, onUpdateEmployees, onNext, onPrevious, onCancel }: Step2TotalHoursProps) {
+  const [isOvertimeModalOpen, setIsOvertimeModalOpen] = useState(false);
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
+  const [paymentDropdownOpen, setPaymentDropdownOpen] = useState<string | null>(null);
+  const [earningsDropdownOpen, setEarningsDropdownOpen] = useState<string | null>(null);
 
   const handleAddOvertime = (employeeId: string) => {
     setSelectedEmployeeId(employeeId);
-    setIsModalOpen(true);
+    setIsOvertimeModalOpen(true);
   };
 
   const handleSaveOvertime = (hours: number) => {
     if (selectedEmployeeId) {
-      setEmployees(prev => prev.map(emp => 
-        emp.id === selectedEmployeeId ? { ...emp, overtime: hours } : emp
-      ));
+      const updatedEmployees = employees.map(emp => 
+        emp.id === selectedEmployeeId 
+          ? { ...emp, overtime: hours, totalPay: calculateTotalPay(emp.baseSalary || 0, emp.totalHours, hours, emp.additionalEarnings) } 
+          : emp
+      );
+      onUpdateEmployees(updatedEmployees);
     }
-    setIsModalOpen(false);
+    setIsOvertimeModalOpen(false);
     setSelectedEmployeeId(null);
+  };
+
+  const handleAddNote = (employeeId: string) => {
+    setSelectedEmployeeId(employeeId);
+    setIsNoteModalOpen(true);
+  };
+
+  const handleSaveNote = (note: string) => {
+    if (selectedEmployeeId) {
+      const updatedEmployees = employees.map(emp => 
+        emp.id === selectedEmployeeId ? { ...emp, notes: note } : emp
+      );
+      onUpdateEmployees(updatedEmployees);
+    }
+    setIsNoteModalOpen(false);
+    setSelectedEmployeeId(null);
+  };
+
+  const updateEmployeeField = (employeeId: string, field: keyof WizardEmployee, value: any) => {
+    const updatedEmployees = employees.map(emp => {
+      if (emp.id === employeeId) {
+        const updated = { ...emp, [field]: value };
+        // Recalculate total pay when relevant fields change
+        if (['totalHours', 'overtime', 'additionalEarnings', 'baseSalary'].includes(field)) {
+          updated.totalPay = calculateTotalPay(
+            updated.baseSalary || 0,
+            updated.totalHours,
+            updated.overtime,
+            updated.additionalEarnings
+          );
+        }
+        return updated;
+      }
+      return emp;
+    });
+    onUpdateEmployees(updatedEmployees);
+  };
+
+  const calculateTotalPay = (baseSalary: number, hours: number, overtime: number, additionalEarnings: number): number => {
+    // Monthly salary calculation (assuming 160 standard hours)
+    const hourlyRate = baseSalary / 160;
+    const regularPay = hours * hourlyRate;
+    const overtimePay = overtime * hourlyRate * 1.5; // 1.5x for overtime
+    return Math.round(regularPay + overtimePay + additionalEarnings);
+  };
+
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
   };
 
   const selectedEmployee = employees.find(e => e.id === selectedEmployeeId);
@@ -57,12 +108,12 @@ export default function Step2TotalHours({ onNext, onPrevious, onCancel }: Step2T
     <div>
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-[#2C2C2C] mb-1">Total Hours</h2>
-        <p className="text-sm text-gray-500">Check employe total hours, time off and aadtional earning</p>
+        <h2 className="text-2xl font-bold text-black mb-1">Total Hours</h2>
+        <p className="text-sm text-gray-500">Check employee total hours, time off and additional earning</p>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden mb-6">
+      <div className="bg-white rounded-xl border border-gray-100 overflow-visible mb-6">
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/50">
@@ -86,8 +137,8 @@ export default function Step2TotalHours({ onNext, onPrevious, onCancel }: Step2T
                       {employee.name.charAt(0)}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-[#2C2C2C]">{employee.name}</p>
-                      <p className="text-xs text-gray-400">FTE · {employee.salary}</p>
+                      <p className="text-sm font-semibold text-black">{employee.name}</p>
+                      <p className="text-xs text-gray-400">FTE · {formatCurrency(employee.baseSalary || 0)}/Year</p>
                     </div>
                   </div>
                 </td>
@@ -95,16 +146,26 @@ export default function Step2TotalHours({ onNext, onPrevious, onCancel }: Step2T
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <Clock size={14} className="text-gray-400" />
-                      <span className="text-sm text-[#2C2C2C]">{employee.totalHours} Hours</span>
+                      <input
+                        type="number"
+                        value={employee.totalHours}
+                        onChange={(e) => updateEmployeeField(employee.id, 'totalHours', parseInt(e.target.value) || 0)}
+                        className="w-16 px-2 py-1 border border-gray-200 rounded text-sm text-black text-center focus:outline-none focus:border-[#F7D046]"
+                      />
                       <span className="text-xs text-gray-400">Total Hour</span>
-                      <Edit2 size={12} className="text-gray-400 cursor-pointer hover:text-gray-600" />
+                      <Edit2 size={12} className="text-gray-400" />
                     </div>
-                    {employee.overtime ? (
+                    {employee.overtime > 0 ? (
                       <div className="flex items-center gap-2">
                         <Clock size={14} className="text-gray-400" />
-                        <span className="text-sm text-[#2C2C2C]">{employee.overtime} Hours</span>
+                        <input
+                          type="number"
+                          value={employee.overtime}
+                          onChange={(e) => updateEmployeeField(employee.id, 'overtime', parseInt(e.target.value) || 0)}
+                          className="w-16 px-2 py-1 border border-gray-200 rounded text-sm text-black text-center focus:outline-none focus:border-[#F7D046]"
+                        />
                         <span className="text-xs text-gray-400">Overtime</span>
-                        <Edit2 size={12} className="text-gray-400 cursor-pointer hover:text-gray-600" />
+                        <Edit2 size={12} className="text-gray-400" />
                       </div>
                     ) : (
                       <button 
@@ -118,28 +179,105 @@ export default function Step2TotalHours({ onNext, onPrevious, onCancel }: Step2T
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  {employee.additionalEarnings ? (
-                    <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                      <span className="text-sm text-[#2C2C2C]">{employee.additionalEarnings}</span>
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <button 
+                        onClick={() => setEarningsDropdownOpen(earningsDropdownOpen === employee.id ? null : employee.id)}
+                        className="flex items-center gap-2 text-sm text-black border border-gray-200 rounded px-3 py-1.5 hover:bg-gray-50"
+                      >
+                        {employee.additionalEarningsType || "Select type"}
+                        <ChevronDown size={14} className="text-gray-400" />
+                      </button>
+                      {earningsDropdownOpen === employee.id && (
+                        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[150px]">
+                          {additionalEarningsTypes.map((type) => (
+                            <button
+                              key={type}
+                              onClick={() => {
+                                updateEmployeeField(employee.id, 'additionalEarningsType', type);
+                                setEarningsDropdownOpen(null);
+                              }}
+                              className="block w-full text-left px-4 py-2 text-sm text-black hover:bg-gray-50"
+                            >
+                              {type || "None"}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <span className="text-sm text-gray-400">-</span>
-                  )}
+                    {employee.additionalEarningsType && (
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-400">$</span>
+                        <input
+                          type="number"
+                          value={employee.additionalEarnings}
+                          onChange={(e) => updateEmployeeField(employee.id, 'additionalEarnings', parseInt(e.target.value) || 0)}
+                          placeholder="0"
+                          className="w-20 px-2 py-1 border border-gray-200 rounded text-sm text-black focus:outline-none focus:border-[#F7D046]"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-sm font-medium text-[#2C2C2C]">{employee.totalPay.toLocaleString()}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-black">{formatCurrency(employee.totalPay)}</span>
+                    <button 
+                      onClick={() => {
+                        const newPay = prompt("Enter total pay:", employee.totalPay.toString());
+                        if (newPay) {
+                          updateEmployeeField(employee.id, 'totalPay', parseInt(newPay) || 0);
+                        }
+                      }}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <Edit2 size={12} />
+                    </button>
+                  </div>
+                </td>
+                <td className="px-6 py-4 relative">
+                  <div className="relative">
+                    <button 
+                      onClick={() => setPaymentDropdownOpen(paymentDropdownOpen === employee.id ? null : employee.id)}
+                      className="flex items-center gap-2 text-sm text-black"
+                    >
+                      {employee.paymentType}
+                      <ChevronDown size={14} className="text-gray-400" />
+                    </button>
+                    {paymentDropdownOpen === employee.id && (
+                      <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[150px]">
+                        {paymentTypeOptions.map((type) => (
+                          <button
+                            key={type}
+                            onClick={() => {
+                              updateEmployeeField(employee.id, 'paymentType', type);
+                              setPaymentDropdownOpen(null);
+                            }}
+                            className="block w-full text-left px-4 py-2 text-sm text-black hover:bg-gray-50"
+                          >
+                            {type}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4">
-                  <button className="flex items-center gap-2 text-sm text-[#2C2C2C]">
-                    {employee.paymentType}
-                    <ChevronDown size={14} className="text-gray-400" />
-                  </button>
-                </td>
-                <td className="px-6 py-4">
-                  <button className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700">
-                    <Plus size={14} />
-                    Add note
+                  <button 
+                    onClick={() => handleAddNote(employee.id)}
+                    className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    {employee.notes ? (
+                      <>
+                        <FileText size={14} className="text-green-500" />
+                        <span className="text-green-600">View note</span>
+                      </>
+                    ) : (
+                      <>
+                        <Plus size={14} />
+                        Add note
+                      </>
+                    )}
                   </button>
                 </td>
               </tr>
@@ -148,14 +286,14 @@ export default function Step2TotalHours({ onNext, onPrevious, onCancel }: Step2T
         </table>
       </div>
 
-      {/* Progress dots */}
-      <div className="flex items-center justify-center gap-1 mb-6">
-        {[...Array(5)].map((_, i) => (
-          <div 
-            key={i} 
-            className={`w-2 h-2 rounded-full ${i < 2 ? 'bg-[#F7D046]' : 'bg-gray-200'}`}
-          />
-        ))}
+      {/* Summary */}
+      <div className="bg-gray-50 rounded-xl p-4 mb-6">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-600">Total Payroll</span>
+          <span className="text-lg font-bold text-black">
+            {formatCurrency(employees.reduce((sum, emp) => sum + emp.totalPay, 0))}
+          </span>
+        </div>
       </div>
 
       {/* Action Buttons */}
@@ -173,13 +311,13 @@ export default function Step2TotalHours({ onNext, onPrevious, onCancel }: Step2T
           </button>
           <button 
             onClick={onPrevious}
-            className="px-6 py-2 border border-gray-300 text-[#2C2C2C] text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-6 py-2 border border-gray-300 text-black text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
           >
             Previous
           </button>
           <button 
             onClick={onNext}
-            className="px-6 py-2 bg-[#F7D046] text-[#2C2C2C] text-sm font-medium rounded-lg hover:bg-[#E5C03E] transition-colors"
+            className="px-6 py-2 bg-[#F7D046] text-black text-sm font-medium rounded-lg hover:bg-[#E5C03E] transition-colors"
           >
             Next
           </button>
@@ -188,10 +326,19 @@ export default function Step2TotalHours({ onNext, onPrevious, onCancel }: Step2T
 
       {/* Overtime Modal */}
       <OvertimeModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isOvertimeModalOpen}
+        onClose={() => setIsOvertimeModalOpen(false)}
         onSave={handleSaveOvertime}
         employeeName={selectedEmployee?.name || ""}
+      />
+
+      {/* Note Modal */}
+      <NoteModal
+        isOpen={isNoteModalOpen}
+        onClose={() => setIsNoteModalOpen(false)}
+        onSave={handleSaveNote}
+        employeeName={selectedEmployee?.name || ""}
+        initialNote={selectedEmployee?.notes || ""}
       />
     </div>
   );

@@ -23,7 +23,7 @@ export default function PayrollBanner() {
           </p>
           
           <Link 
-            href="/payroll/run"
+            href="/payroll/wizard"
             className="inline-block px-4 py-2 bg-[#F7D046] text-[#2C2C2C] font-medium text-sm rounded-lg hover:bg-[#E5C03E] transition-colors"
           >
             Run Late Payroll

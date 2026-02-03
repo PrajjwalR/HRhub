@@ -1,38 +1,39 @@
 "use client";
 
-interface Employee {
-  id: string;
-  name: string;
-  avatarColor: string;
-  salary: string;
-  paidTimeOff: { hours: number; remaining: number };
-  paidHoliday: { hours: number; remaining: number };
-  sickLeave: { hours: number; remaining: number };
-}
+import { WizardEmployee } from "@/app/payroll/wizard/page";
 
 interface Step3TimeOffProps {
+  employees: WizardEmployee[];
+  onUpdateEmployees: (employees: WizardEmployee[]) => void;
   onNext: () => void;
   onPrevious: () => void;
   onCancel: () => void;
 }
 
-const employees: Employee[] = [
-  { id: "1", name: "Ralph Edwards", avatarColor: "bg-yellow-500", salary: "$89,000/Year", paidTimeOff: { hours: 0, remaining: 100 }, paidHoliday: { hours: 20, remaining: 80 }, sickLeave: { hours: 48, remaining: 52 } },
-  { id: "2", name: "Arlene McCoy", avatarColor: "bg-orange-500", salary: "$24,000/year", paidTimeOff: { hours: 50, remaining: 50 }, paidHoliday: { hours: 0, remaining: 100 }, sickLeave: { hours: 0, remaining: 120 } },
-  { id: "3", name: "Wade Warren", avatarColor: "bg-yellow-600", salary: "$2,000/year", paidTimeOff: { hours: 74, remaining: 36 }, paidHoliday: { hours: 0, remaining: 70 }, sickLeave: { hours: 0, remaining: 120 } },
-  { id: "4", name: "Jacob Jones", avatarColor: "bg-amber-600", salary: "$556,000/year", paidTimeOff: { hours: 0, remaining: 100 }, paidHoliday: { hours: 40, remaining: 60 }, sickLeave: { hours: 24, remaining: 96 } },
-  { id: "5", name: "Jenny Wilson", avatarColor: "bg-blue-500", salary: "$1,234,000/year", paidTimeOff: { hours: 64, remaining: 36 }, paidHoliday: { hours: 0, remaining: 100 }, sickLeave: { hours: 0, remaining: 120 } },
-  { id: "6", name: "Rudolp Wayne", avatarColor: "bg-red-500", salary: "$32,000/year", paidTimeOff: { hours: 100, remaining: 0 }, paidHoliday: { hours: 67, remaining: 33 }, sickLeave: { hours: 0, remaining: 12 } },
-  { id: "7", name: "Jennifer Kwok", avatarColor: "bg-orange-400", salary: "", paidTimeOff: { hours: 0, remaining: 0 }, paidHoliday: { hours: 100, remaining: 0 }, sickLeave: { hours: 56, remaining: 0 } },
-];
+export default function Step3TimeOff({ employees, onUpdateEmployees, onNext, onPrevious, onCancel }: Step3TimeOffProps) {
+  const updateEmployeeField = (employeeId: string, field: keyof WizardEmployee, value: any) => {
+    const updatedEmployees = employees.map(emp => {
+      if (emp.id === employeeId) {
+        return { ...emp, [field]: value };
+      }
+      return emp;
+    });
+    onUpdateEmployees(updatedEmployees);
+  };
 
-export default function Step3TimeOff({ onNext, onPrevious, onCancel }: Step3TimeOffProps) {
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+  };
+
+  // Assume 100 hours remaining for each category by default
+  const getRemaining = (used: number, total: number = 100) => total - used;
+
   return (
     <div>
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-[#2C2C2C] mb-1">Time Off</h2>
-        <p className="text-sm text-gray-500">Check employe total hours, time off and addtional earning</p>
+        <h2 className="text-2xl font-bold text-black mb-1">Time Off</h2>
+        <p className="text-sm text-gray-500">Check employee total hours, time off and additional earning</p>
       </div>
 
       {/* Table */}
@@ -53,51 +54,74 @@ export default function Step3TimeOff({ onNext, onPrevious, onCancel }: Step3Time
                 className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
               >
                 <td className="px-6 py-4">
-                  <div>
-                    <p className="text-sm font-medium text-[#2C2C2C]">{employee.name}</p>
-                    <p className="text-xs text-gray-400">FTE · {employee.salary}</p>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full ${employee.avatarColor} flex items-center justify-center text-white text-sm font-medium`}>
+                      {employee.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-black">{employee.name}</p>
+                      <p className="text-xs text-gray-400">FTE · {formatCurrency(employee.baseSalary || 0)}/Year</p>
+                    </div>
                   </div>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2 mb-1">
                     <input 
-                      type="text" 
-                      value={employee.paidTimeOff.hours}
-                      readOnly
-                      className="w-16 px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-center focus:outline-none focus:border-[#F7D046]"
+                      type="number" 
+                      value={employee.paidTimeOff}
+                      onChange={(e) => updateEmployeeField(employee.id, 'paidTimeOff', parseInt(e.target.value) || 0)}
+                      className="w-16 px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-center text-black focus:outline-none focus:border-[#F7D046]"
                     />
                     <span className="text-xs text-gray-400">hrs</span>
                   </div>
-                  <p className="text-xs text-gray-400">{employee.paidTimeOff.remaining} hrs remaining</p>
+                  <p className="text-xs text-gray-400">{getRemaining(employee.paidTimeOff)} hrs remaining</p>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2 mb-1">
                     <input 
-                      type="text" 
-                      value={employee.paidHoliday.hours}
-                      readOnly
-                      className="w-16 px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-center focus:outline-none focus:border-[#F7D046]"
+                      type="number" 
+                      value={employee.paidHoliday}
+                      onChange={(e) => updateEmployeeField(employee.id, 'paidHoliday', parseInt(e.target.value) || 0)}
+                      className="w-16 px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-center text-black focus:outline-none focus:border-[#F7D046]"
                     />
                     <span className="text-xs text-gray-400">hrs</span>
                   </div>
-                  <p className="text-xs text-gray-400">{employee.paidHoliday.remaining} hrs remaining</p>
+                  <p className="text-xs text-gray-400">{getRemaining(employee.paidHoliday)} hrs remaining</p>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2 mb-1">
                     <input 
-                      type="text" 
-                      value={employee.sickLeave.hours}
-                      readOnly
-                      className="w-16 px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-center focus:outline-none focus:border-[#F7D046]"
+                      type="number" 
+                      value={employee.sickLeave}
+                      onChange={(e) => updateEmployeeField(employee.id, 'sickLeave', parseInt(e.target.value) || 0)}
+                      className="w-16 px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-center text-black focus:outline-none focus:border-[#F7D046]"
                     />
                     <span className="text-xs text-gray-400">hrs</span>
                   </div>
-                  <p className="text-xs text-gray-400">{employee.sickLeave.remaining} hrs remaining</p>
+                  <p className="text-xs text-gray-400">{getRemaining(employee.sickLeave, 120)} hrs remaining</p>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Summary */}
+      <div className="bg-gray-50 rounded-xl p-4 mb-6">
+        <div className="grid grid-cols-3 gap-4 text-center">
+          <div>
+            <p className="text-sm text-gray-500">Total PTO Used</p>
+            <p className="text-lg font-bold text-black">{employees.reduce((sum, emp) => sum + emp.paidTimeOff, 0)} hrs</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Total Holiday Used</p>
+            <p className="text-lg font-bold text-black">{employees.reduce((sum, emp) => sum + emp.paidHoliday, 0)} hrs</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Total Sick Leave Used</p>
+            <p className="text-lg font-bold text-black">{employees.reduce((sum, emp) => sum + emp.sickLeave, 0)} hrs</p>
+          </div>
+        </div>
       </div>
 
       {/* Action Buttons */}
@@ -115,13 +139,13 @@ export default function Step3TimeOff({ onNext, onPrevious, onCancel }: Step3Time
           </button>
           <button 
             onClick={onPrevious}
-            className="px-6 py-2 border border-gray-300 text-[#2C2C2C] text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-6 py-2 border border-gray-300 text-black text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
           >
             Previous
           </button>
           <button 
             onClick={onNext}
-            className="px-6 py-2 bg-[#F7D046] text-[#2C2C2C] text-sm font-medium rounded-lg hover:bg-[#E5C03E] transition-colors"
+            className="px-6 py-2 bg-[#F7D046] text-black text-sm font-medium rounded-lg hover:bg-[#E5C03E] transition-colors"
           >
             Next
           </button>

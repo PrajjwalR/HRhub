@@ -3,7 +3,8 @@
 import { useState } from "react";
 import PayrollBanner from "@/components/payroll/PayrollBanner";
 import PayrollTable from "@/components/payroll/PayrollTable";
-import { Plus } from "lucide-react";
+import { Plus, FileText } from "lucide-react";
+import Link from "next/link";
 
 export default function PayrollPage() {
   const [activeTab, setActiveTab] = useState("Payroll list");
@@ -18,7 +19,16 @@ export default function PayrollPage() {
   return (
     <div className="p-8">
       {/* Header */}
-      <h1 className="text-3xl font-serif text-[#2C2C2C] mb-6">Payroll</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-serif text-[#2C2C2C]">Payroll</h1>
+        <Link
+          href="/payroll/slips"
+          className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-[#2C2C2C] font-medium rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <FileText size={18} />
+          View All Salary Slips
+        </Link>
+      </div>
 
       {/* Tabs */}
       <div className="flex items-center gap-6 mb-8 border-b border-gray-100 pb-1">

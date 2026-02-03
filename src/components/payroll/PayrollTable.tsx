@@ -174,8 +174,8 @@ export default function PayrollTable() {
               >
                 <td className="px-6 py-4">
                   <div>
-                    <p className="text-sm font-medium text-[#2C2C2C]">{item.name}</p>
-                    <p className="text-xs text-gray-400">{item.type}</p>
+                    <p className="text-sm font-semibold text-black">{item.name}</p>
+                    <p className="text-xs text-gray-500">{item.type}</p>
                   </div>
                 </td>
                 <td className="px-6 py-4">
@@ -183,14 +183,14 @@ export default function PayrollTable() {
                     <span className="px-2 py-1 bg-gray-100 rounded text-xs font-medium text-gray-600">
                       {item.dayOfWeek}
                     </span>
-                    <span className="text-sm text-[#2C2C2C]">{item.payDate}</span>
+                    <span className="text-sm text-black">{item.payDate}</span>
                   </div>
                 </td>
                 <td className="px-6 py-4 text-center">
-                  <span className="text-sm text-[#2C2C2C]">{item.employees}</span>
+                  <span className="text-sm text-black">{item.employees}</span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-sm font-medium text-[#2C2C2C]">{item.totalPayment}</span>
+                  <span className="text-sm font-semibold text-black">{item.totalPayment}</span>
                 </td>
                 <td className="px-6 py-4">
                   {getStatusBadge(item.status)}
@@ -208,7 +208,7 @@ export default function PayrollTable() {
                 <td className="px-6 py-4">
                   {item.action && (
                     <Link 
-                      href="/payroll/run"
+                      href="/payroll/wizard"
                       className={`inline-block px-3 py-1.5 text-xs font-medium rounded border transition-colors ${
                         item.status === 'late' 
                           ? 'border-red-200 text-red-500 hover:bg-red-50' 
