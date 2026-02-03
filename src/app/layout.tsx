@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   description: "Modern HR Management System",
 };
 
-import Sidebar from "@/components/Sidebar";
 import { AuthProvider } from "@/context/AuthContext";
+import LayoutWrapper from "@/components/LayoutWrapper";
 
 export default function RootLayout({
   children,
@@ -31,12 +31,9 @@ export default function RootLayout({
         className={`${playfair.variable} ${hostGrotesk.variable} antialiased bg-[#FDFDFD] text-[#171717] font-sans`}
       >
         <AuthProvider>
-          <div className="flex">
-            <Sidebar />
-            <main className="flex-1 ml-20 min-h-screen">
-              {children}
-            </main>
-          </div>
+          <LayoutWrapper>
+            {children}
+          </LayoutWrapper>
         </AuthProvider>
       </body>
     </html>
