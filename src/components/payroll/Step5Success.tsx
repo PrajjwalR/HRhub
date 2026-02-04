@@ -8,6 +8,7 @@ interface Step5SuccessProps {
   employees?: WizardEmployee[];
   generatedSlips?: any[];
   onFinish?: () => void;
+  onPrevious?: () => void;
 }
 
 interface ChartDataItem {
@@ -17,7 +18,7 @@ interface ChartDataItem {
   color: string;
 }
 
-export default function Step5Success({ employees = [], generatedSlips = [], onFinish }: Step5SuccessProps) {
+export default function Step5Success({ employees = [], generatedSlips = [], onFinish, onPrevious }: Step5SuccessProps) {
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(amount);
   };
@@ -232,12 +233,12 @@ export default function Step5Success({ employees = [], generatedSlips = [], onFi
       {/* Action Buttons */}
       <div className="flex items-center justify-end pt-6 border-t border-gray-200">
         <div className="flex items-center gap-3">
-          <Link 
-            href="/payroll/wizard"
+          <button 
+            onClick={onPrevious}
             className="px-6 py-2.5 border border-gray-300 text-black text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Rerun Payroll
-          </Link>
+            Previous
+          </button>
           <Link 
             href="/payroll"
             className="px-6 py-2.5 bg-[#F7D046] text-black text-sm font-medium rounded-lg hover:bg-[#E5C03E] transition-colors"

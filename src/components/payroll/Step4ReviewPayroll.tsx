@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { WizardEmployee } from "@/app/payroll/wizard/page";
 import { createSalarySlip, fetchEmployeeSalarySlips } from "@/lib/frappePayroll";
@@ -17,6 +17,7 @@ interface Step4ReviewPayrollProps {
 export default function Step4ReviewPayroll({ employees, payPeriod, onNext, onPrevious, onCancel, onSlipsGenerated }: Step4ReviewPayrollProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isEmployeeSummaryExpanded, setIsEmployeeSummaryExpanded] = useState(false);
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(amount);
@@ -129,28 +130,40 @@ export default function Step4ReviewPayroll({ employees, payPeriod, onNext, onPre
             </div>
           </div>
 
-          {/* Employee Summary */}
+          {/* Employee Summary - Collapsible */}
           <div className="bg-white rounded-xl border border-gray-100 p-6">
-            <h3 className="text-xl font-bold text-black mb-4">Employee Summary</h3>
-            <div className="space-y-3 max-h-64 overflow-y-auto">
-              {employees.map((emp) => (
-                <div key={emp.id} className="flex items-center justify-between py-2 border-b border-gray-50">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full ${emp.avatarColor} flex items-center justify-center text-white text-xs font-medium`}>
-                      {emp.name.charAt(0)}
+            <button 
+              onClick={() => setIsEmployeeSummaryExpanded(!isEmployeeSummaryExpanded)}
+              className="w-full flex items-center justify-between"
+            >
+              <h3 className="text-xl font-bold text-black">Employee Summary ({employees.length})</h3>
+              {isEmployeeSummaryExpanded ? (
+                <ChevronDown size={20} className="text-gray-400" />
+              ) : (
+                <ChevronRight size={20} className="text-gray-400" />
+              )}
+            </button>
+            {isEmployeeSummaryExpanded && (
+              <div className="space-y-3 max-h-64 overflow-y-auto mt-4">
+                {employees.map((emp) => (
+                  <div key={emp.id} className="flex items-center justify-between py-2 border-b border-gray-50">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full ${emp.avatarColor} flex items-center justify-center text-white text-xs font-medium`}>
+                        {emp.name.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-black">{emp.name}</p>
+                        <p className="text-xs text-gray-400">{emp.totalHours}h + {emp.overtime}h OT</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-black">{emp.name}</p>
-                      <p className="text-xs text-gray-400">{emp.totalHours}h + {emp.overtime}h OT</p>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-black">{formatCurrency(emp.totalPay)}</p>
+                      <p className="text-xs text-gray-400">{emp.paymentType}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-black">{formatCurrency(emp.totalPay)}</p>
-                    <p className="text-xs text-gray-400">{emp.paymentType}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

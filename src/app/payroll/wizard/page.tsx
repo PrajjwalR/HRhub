@@ -216,6 +216,7 @@ export default function PayrollWizardPage() {
               <Step5Success 
                 employees={wizardData.selectedEmployees}
                 generatedSlips={wizardData.generatedSlips}
+                onPrevious={handlePrevious}
               />
             )}
           </div>
