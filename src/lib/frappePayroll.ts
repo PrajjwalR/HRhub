@@ -148,6 +148,11 @@ export async function createSalarySlip(data: {
   posting_date: string;
   start_date: string;
   end_date: string;
+  payment_days?: number;
+  total_working_hours?: number;
+  hour_rate?: number;
+  earnings?: Array<{ salary_component: string; amount: number }>;
+  deductions?: Array<{ salary_component: string; amount: number }>;
 }): Promise<SalarySlip> {
   const response = await fetch(`/api/salary-slip`, {
     method: "POST",

@@ -40,19 +40,42 @@ export default function Step4ReviewPayroll({ employees, payPeriod, onNext, onPre
 
     for (const emp of employees) {
       try {
-        // Try to create a new salary slip
+        // Build earnings array for additional earnings
+        const earnings: Array<{ salary_component: string; amount: number }> = [];
+        
+        // Add overtime as an earning component if > 0
+        if (emp.overtime > 0) {
+          const hourlyRate = (emp.baseSalary || 0) / 160;
+          const overtimeAmount = emp.overtime * hourlyRate * 1.5;
+          earnings.push({
+            salary_component: "Overtime",
+            amount: Math.round(overtimeAmount),
+          });
+        }
+        
+        // Add additional earnings if > 0
+        if (emp.additionalEarnings > 0) {
+          earnings.push({
+            salary_component: emp.additionalEarningsType || "Bonus",
+            amount: emp.additionalEarnings,
+          });
+        }
+
+        // Try to create a new salary slip with all the details
         const slip = await createSalarySlip({
           employee: emp.id,
           posting_date: new Date().toISOString().split("T")[0],
           start_date: payPeriod.start,
           end_date: payPeriod.end,
+          payment_days: Math.round(emp.totalHours / 8), // Convert hours to days
+          earnings: earnings.length > 0 ? earnings : undefined,
         });
         results.push({ employee: emp, slip, success: true, isExisting: false });
       } catch (err: any) {
         console.error(`Failed to create slip for ${emp.name}:`, err);
 
         // If salary slip already exists, try to fetch it
-        if (err.message?.includes("already created") || err.message?.includes("409")) {
+        if (err.message?.includes("already created") || err.message?.includes("409") || err.message?.includes("Salary Slip already exists")) {
           try {
             const existingSlips = await fetchEmployeeSalarySlips(emp.id, payPeriod.start, payPeriod.end);
             if (existingSlips && existingSlips.length > 0) {
@@ -156,9 +179,20 @@ export default function Step4ReviewPayroll({ employees, payPeriod, onNext, onPre
                         <p className="text-xs text-gray-400">{emp.totalHours}h + {emp.overtime}h OT</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-black">{formatCurrency(emp.totalPay)}</p>
-                      <p className="text-xs text-gray-400">{emp.paymentType}</p>
+                    <div className="flex items-center gap-6">
+                      {/* Bank Details */}
+                      {emp.bankName && (
+                        <div className="text-right">
+                          <p className="text-xs text-gray-500">{emp.bankName}</p>
+                          <p className="text-xs text-gray-400">
+                            ****{emp.accountNumber?.slice(-4) || "----"}
+                          </p>
+                        </div>
+                      )}
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-black">{formatCurrency(emp.totalPay)}</p>
+                        <p className="text-xs text-gray-400">{emp.paymentType}</p>
+                      </div>
                     </div>
                   </div>
                 ))}

@@ -15,6 +15,7 @@ export default function SalarySlipPage() {
   const [salarySlip, setSalarySlip] = useState<SalarySlip | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [bankDetails, setBankDetails] = useState<{ bankName: string; accountNumber: string } | null>(null);
 
   useEffect(() => {
     const fetchSlip = async () => {
@@ -22,6 +23,25 @@ export default function SalarySlipPage() {
         setIsLoading(true);
         const slip = await fetchSalarySlipDetails(slipName);
         setSalarySlip(slip);
+        
+        // Always try to fetch bank details from Bank Account (as fallback or primary source)
+        if (slip.employee) {
+          try {
+            const bankResponse = await fetch(`/api/bank-account?employee=${slip.employee}`);
+            if (bankResponse.ok) {
+              const bankData = await bankResponse.json();
+              console.log("Bank data fetched:", bankData);
+              if (bankData.bankAccount) {
+                setBankDetails({
+                  bankName: bankData.bankAccount.bank || "",
+                  accountNumber: bankData.bankAccount.bank_account_no || "",
+                });
+              }
+            }
+          } catch (bankErr) {
+            console.error("Error fetching bank details:", bankErr);
+          }
+        }
       } catch (err: any) {
         setError(err.message || "Failed to load salary slip");
       } finally {
@@ -169,13 +189,13 @@ export default function SalarySlipPage() {
                 <td className="info-label">Joining Date:</td>
                 <td style={{ color: "#000" }}>{salarySlip.date_of_joining ? formatDate(salarySlip.date_of_joining) : "-"}</td>
                 <td className="info-label">Bank Name:</td>
-                <td style={{ color: "#000" }}>{salarySlip.bank_name || "-"}</td>
+                <td style={{ color: "#000" }}>{salarySlip.bank_name || bankDetails?.bankName || "-"}</td>
               </tr>
               <tr>
                 <td className="info-label">Designation:</td>
                 <td style={{ color: "#000" }}>{salarySlip.designation || "-"}</td>
                 <td className="info-label">Bank Account No:</td>
-                <td style={{ color: "#000" }}>{salarySlip.bank_account_no || "-"}</td>
+                <td style={{ color: "#000" }}>{salarySlip.bank_account_no || bankDetails?.accountNumber || "-"}</td>
               </tr>
               <tr>
                 <td className="info-label">Location:</td>

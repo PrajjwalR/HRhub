@@ -121,28 +121,51 @@ export default function Step1EmployeeSelect({ onNext, onCancel, onEmployeesSelec
     emp.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleNext = () => {
+  const handleNext = async () => {
     // Convert selected employees to WizardEmployee format
-    const selectedEmployees: WizardEmployee[] = employees
-      .filter(e => e.selected && e.hasSalaryStructure)
-      .map(emp => ({
-        id: emp.id,
-        name: emp.name,
-        avatarColor: emp.avatarColor,
-        hasSalaryStructure: emp.hasSalaryStructure,
-        salaryStructureName: emp.salaryStructureName,
-        baseSalary: emp.baseSalary || 0,
-        totalHours: emp.totalHours,
-        overtime: emp.overtime || 0,
-        additionalEarnings: 0,
-        additionalEarningsType: "",
-        totalPay: emp.baseSalary || 0,
-        paymentType: emp.paymentMethod,
-        notes: "",
-        paidTimeOff: 0,
-        paidHoliday: 0,
-        sickLeave: 0,
-      }));
+    const selectedEmps = employees.filter(e => e.selected && e.hasSalaryStructure);
+    
+    // Fetch bank details for each employee
+    const selectedEmployees: WizardEmployee[] = await Promise.all(
+      selectedEmps.map(async (emp) => {
+        let bankName = "";
+        let accountNumber = "";
+        
+        try {
+          const response = await fetch(`/api/bank-account?employee=${emp.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.bankAccount) {
+              bankName = data.bankAccount.bank || "";
+              accountNumber = data.bankAccount.bank_account_no || "";
+            }
+          }
+        } catch (err) {
+          console.error(`Error fetching bank details for ${emp.id}:`, err);
+        }
+        
+        return {
+          id: emp.id,
+          name: emp.name,
+          avatarColor: emp.avatarColor,
+          hasSalaryStructure: emp.hasSalaryStructure,
+          salaryStructureName: emp.salaryStructureName,
+          baseSalary: emp.baseSalary || 0,
+          totalHours: emp.totalHours,
+          overtime: emp.overtime || 0,
+          additionalEarnings: 0,
+          additionalEarningsType: "",
+          totalPay: emp.baseSalary || 0,
+          paymentType: emp.paymentMethod,
+          notes: "",
+          paidTimeOff: 0,
+          paidHoliday: 0,
+          sickLeave: 0,
+          bankName,
+          accountNumber,
+        };
+      })
+    );
     
     onEmployeesSelected(selectedEmployees);
     onNext();

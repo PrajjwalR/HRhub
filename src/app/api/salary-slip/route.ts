@@ -63,13 +63,49 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { employee, posting_date, start_date, end_date } = body;
+    const { 
+      employee, 
+      posting_date, 
+      start_date, 
+      end_date,
+      // Additional fields from wizard
+      payment_days,
+      total_working_hours,
+      hour_rate,
+      // Earnings components
+      earnings = [],
+      // Deduction components  
+      deductions = [],
+    } = body;
 
     if (!employee || !posting_date || !start_date || !end_date) {
       return NextResponse.json(
         { error: "Missing required fields: employee, posting_date, start_date, end_date" },
         { status: 400 }
       );
+    }
+
+    // Build salary slip data
+    const salarySlipData: Record<string, any> = {
+      employee,
+      posting_date,
+      start_date,
+      end_date,
+    };
+
+    // Add optional fields if provided
+    if (payment_days !== undefined) {
+      salarySlipData.payment_days = payment_days;
+    }
+
+    // Add custom earnings if provided
+    if (earnings.length > 0) {
+      salarySlipData.earnings = earnings;
+    }
+
+    // Add custom deductions if provided
+    if (deductions.length > 0) {
+      salarySlipData.deductions = deductions;
     }
 
     // Create salary slip in Frappe
@@ -79,17 +115,13 @@ export async function POST(request: NextRequest) {
         "Content-Type": "application/json",
         "Authorization": `token ${FRAPPE_API_KEY}:${FRAPPE_API_SECRET}`,
       },
-      body: JSON.stringify({
-        employee,
-        posting_date,
-        start_date,
-        end_date,
-      }),
+      body: JSON.stringify(salarySlipData),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.exception || `Frappe API error: ${response.statusText}`);
+      console.error("Frappe salary slip creation error:", errorData);
+      throw new Error(errorData.exception || errorData._server_messages || `Frappe API error: ${response.statusText}`);
     }
 
     const data = await response.json();
@@ -98,7 +130,8 @@ export async function POST(request: NextRequest) {
     console.error("Error creating salary slip:", error);
     
     // Use 409 Conflict for "already created" errors
-    const isDuplicate = error.message?.includes("already created for this period");
+    const isDuplicate = error.message?.includes("already created for this period") || 
+                        error.message?.includes("Salary Slip already exists");
     
     return NextResponse.json(
       { error: error.message || "Failed to create salary slip" },

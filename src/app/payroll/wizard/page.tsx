@@ -34,6 +34,8 @@ export interface WizardEmployee {
   paidTimeOff: number;
   paidHoliday: number;
   sickLeave: number;
+  bankName?: string;
+  accountNumber?: string;
 }
 
 export interface WizardData {
