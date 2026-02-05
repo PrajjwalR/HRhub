@@ -26,6 +26,7 @@ interface Employee {
   hasSalaryStructure: boolean;
   salaryStructureName?: string;
   baseSalary?: number;
+  designation?: string;
 }
 
 export default function Step1EmployeeSelect({ onNext, onCancel, onEmployeesSelected, payPeriod }: Step1EmployeeSelectProps) {
@@ -66,6 +67,7 @@ export default function Step1EmployeeSelect({ onNext, onCancel, onEmployeesSelec
                 hasSalaryStructure: !!assignment,
                 salaryStructureName: assignment?.salary_structure,
                 baseSalary: assignment?.base || 0,
+                designation: emp.designation || emp.role || "",
               };
             } catch (err) {
               console.error(`Error fetching assignment for ${emp.id}:`, err);
@@ -79,6 +81,7 @@ export default function Step1EmployeeSelect({ onNext, onCancel, onEmployeesSelec
                 workTime: emp.type || "FTE",
                 selected: false,
                 hasSalaryStructure: false,
+                designation: emp.designation || emp.role || "",
               };
             }
           })
@@ -296,22 +299,27 @@ export default function Step1EmployeeSelect({ onNext, onCancel, onEmployeesSelec
                       <div className={`w-8 h-8 rounded-full ${employee.avatarColor} flex items-center justify-center text-white text-sm font-medium`}>
                         {employee.name.charAt(0)}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-black">
-                          {employee.name}
-                        </span>
-                        {!employee.hasSalaryStructure && (
-                          <div className="group relative">
-                            <AlertCircle size={16} className="text-orange-500" />
-                            <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-10">
-                              No salary structure assigned. Please assign in Frappe first.
-                            </div>
-                          </div>
-                        )}
-                        {employee.hasSalaryStructure && employee.salaryStructureName && (
-                          <span className="text-xs text-gray-400">
-                            ({employee.salaryStructureName})
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-black">
+                            {employee.name}
                           </span>
+                          {!employee.hasSalaryStructure && (
+                            <div className="group relative">
+                              <AlertCircle size={16} className="text-orange-500" />
+                              <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-10">
+                                No salary structure assigned. Please assign in Frappe first.
+                              </div>
+                            </div>
+                          )}
+                          {employee.hasSalaryStructure && employee.salaryStructureName && (
+                            <span className="text-xs text-gray-400">
+                              ({employee.salaryStructureName})
+                            </span>
+                          )}
+                        </div>
+                        {employee.designation && (
+                          <p className="text-xs text-gray-500 mt-0.5">{employee.designation}</p>
                         )}
                       </div>
                     </div>

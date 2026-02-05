@@ -160,8 +160,8 @@ export default function PayrollTable() {
               <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">Pay runs</th>
               <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">Pay date</th>
               <th className="text-center px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">Employees</th>
-              <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">Total payment</th>
-              <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+              <th className="text-right px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">Total payment</th>
+              <th className="text-center px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
               <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">Approved date</th>
               <th className="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wider">Action</th>
             </tr>
@@ -189,10 +189,10 @@ export default function PayrollTable() {
                 <td className="px-6 py-4 text-center">
                   <span className="text-sm text-black">{item.employees}</span>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-6 py-4 text-right">
                   <span className="text-sm font-semibold text-black">{item.totalPayment}</span>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-6 py-4 text-center">
                   {getStatusBadge(item.status)}
                 </td>
                 <td className="px-6 py-4">

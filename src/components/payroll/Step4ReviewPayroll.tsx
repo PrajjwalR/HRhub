@@ -128,27 +128,27 @@ export default function Step4ReviewPayroll({ employees, payPeriod, onNext, onPre
 
           {/* Detail Payment Section */}
           <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
-            <h3 className="text-xl font-bold text-black mb-6">Payment Details</h3>
+            <h3 className="text-xl font-bold text-black mb-6 text-center">Payment Details</h3>
             
-            <div className="space-y-4">
+            <div className="max-w-md mx-auto space-y-4">
               <div className="flex items-center justify-between py-3 border-b border-gray-100">
                 <span className="text-sm text-gray-500">Total net wages</span>
-                <span className="text-lg font-bold text-black">{formatCurrency(totalNetWages)}</span>
+                <span className="text-lg font-bold text-black text-right">{formatCurrency(totalNetWages)}</span>
               </div>
               
               <div className="flex items-center justify-between py-3 border-b border-gray-100">
                 <span className="text-sm text-gray-500">Total overtime premium</span>
-                <span className="text-lg font-bold text-black">{formatCurrency(totalOvertime)}</span>
+                <span className="text-lg font-bold text-black text-right">{formatCurrency(totalOvertime)}</span>
               </div>
               
               <div className="flex items-center justify-between py-3 border-b border-gray-100">
                 <span className="text-sm text-gray-500">Total additional earnings</span>
-                <span className="text-lg font-bold text-black">{formatCurrency(totalAdditionalEarnings)}</span>
+                <span className="text-lg font-bold text-black text-right">{formatCurrency(totalAdditionalEarnings)}</span>
               </div>
               
-              <div className="flex items-center justify-between py-4">
+              <div className="flex items-center justify-between py-4 bg-[#FFF5E6] rounded-lg px-4 -mx-4">
                 <span className="text-base font-medium text-black">Total Payroll</span>
-                <span className="text-2xl font-bold text-black">{formatCurrency(totalPayroll)}</span>
+                <span className="text-2xl font-bold text-black text-right">{formatCurrency(totalPayroll)}</span>
               </div>
             </div>
           </div>

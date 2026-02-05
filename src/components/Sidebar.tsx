@@ -41,6 +41,7 @@ export default function Sidebar() {
   const allNavItems = [
     { icon: LayoutGrid, href: "/dashboard", label: "Dashboard", roles: ["admin", "employee"] },
     { icon: Wallet, href: "/payroll", label: "Payroll", roles: ["admin"] },
+    { icon: FileText, href: "/my-payslips", label: "My Payslips", roles: ["employee"] },
     { icon: CircleDollarSign, href: "/salary", label: "Expenses", roles: ["admin"] },
     { icon: Star, href: "/favorites", label: "Benefit", roles: ["admin", "employee"] },
     { icon: CalendarDays, href: "/time-attendance", label: "Time & Attendance", roles: ["admin", "employee"] },
@@ -131,6 +132,13 @@ export default function Sidebar() {
                 onClick={() => setShowProfileMenu(false)}
               >
                 View Profile
+              </a>
+              <a 
+                href="/my-payslips" 
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                onClick={() => setShowProfileMenu(false)}
+              >
+                My Payslips
               </a>
               <div className="border-t border-gray-100 my-1"></div>
               <button

@@ -26,23 +26,32 @@ export default function ProfilePage() {
   const [editBankDetails, setEditBankDetails] = useState<BankDetails>(bankDetails);
   const [bankError, setBankError] = useState<string | null>(null);
   const [employeeId, setEmployeeId] = useState<string | null>(null);
+  const [employeeData, setEmployeeData] = useState<{
+    employee_name: string;
+    designation: string;
+    department: string;
+    date_of_joining?: string;
+    company?: string;
+    cell_number?: string;
+    personal_email?: string;
+  } | null>(null);
 
   const profileUser = {
-    name: user?.name || "John Doe",
-    role: user?.role || "Employee",
-    email: user?.email || "john.doe@hrhub.com",
-    phone: "+1 (555) 123-4567",
-    location: "New York, USA",
-    department: "Human Resources",
-    employeeId: employeeId || user?.name || "EMP-2023-001",
-    joinDate: "Jan 15, 2020",
+    name: employeeData?.employee_name || user?.name || "Employee",
+    role: employeeData?.designation || user?.role || "Employee",
+    email: user?.email || "employee@company.com",
+    phone: employeeData?.cell_number || "-",
+    location: employeeData?.company || "-",
+    department: employeeData?.department || "-",
+    employeeId: employeeId || "-",
+    joinDate: employeeData?.date_of_joining ? new Date(employeeData.date_of_joining).toLocaleDateString("en-IN", { year: "numeric", month: "short", day: "numeric" }) : "-",
     avatarColor: "bg-[#4A72FF]",
-    avatarText: (user?.name || "JD").split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+    avatarText: (employeeData?.employee_name || user?.name || "E").split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
   };
 
-  // Fetch the actual Employee ID from Frappe based on user email
+  // Fetch the actual Employee data from Frappe based on user email
   useEffect(() => {
-    const fetchEmployeeId = async () => {
+    const fetchEmployeeData = async () => {
       if (!user?.email) return;
       
       try {
@@ -51,16 +60,26 @@ export default function ProfilePage() {
         if (response.ok) {
           const data = await response.json();
           if (data && data.length > 0) {
-            setEmployeeId(data[0].name); // Set the actual Frappe Employee ID
-            console.log("Found Employee ID:", data[0].name);
+            const emp = data[0];
+            setEmployeeId(emp.name); // Set the actual Frappe Employee ID
+            setEmployeeData({
+              employee_name: emp.employee_name,
+              designation: emp.designation,
+              department: emp.department,
+              date_of_joining: emp.date_of_joining,
+              company: emp.company,
+              cell_number: emp.cell_number,
+              personal_email: emp.personal_email,
+            });
+            console.log("Found Employee:", emp.name, emp.employee_name);
           }
         }
       } catch (err) {
-        console.error("Error fetching employee ID:", err);
+        console.error("Error fetching employee data:", err);
       }
     };
 
-    fetchEmployeeId();
+    fetchEmployeeData();
   }, [user?.email]);
 
   // Fetch bank details when employeeId is available

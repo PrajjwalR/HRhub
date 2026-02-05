@@ -48,6 +48,8 @@ export async function GET() {
       id: emp.name || `emp-${index}`,
       name: emp.employee_name || emp.name || "Unknown Employee",
       role: emp.designation || "Employee",
+      designation: emp.designation || "",
+      department: emp.department || "",
       avatarColor: getAvatarColor(emp.employee_name || emp.name || ""),
       type: emp.employment_type || "Fulltime",
       // For now, set attendance data to null - can be enhanced later
