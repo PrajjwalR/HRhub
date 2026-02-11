@@ -11,7 +11,8 @@ import {
   Users, 
   Settings,
   Menu,
-  X
+  X,
+  CalendarCheck
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
@@ -45,6 +46,7 @@ export default function Sidebar() {
     { icon: CircleDollarSign, href: "/salary", label: "Expenses", roles: ["admin"] },
     { icon: Star, href: "/favorites", label: "Benefit", roles: ["admin", "employee"] },
     { icon: CalendarDays, href: "/time-attendance", label: "Time & Attendance", roles: ["admin", "employee"] },
+    { icon: CalendarCheck, href: "/leaves", label: "Leaves", roles: ["admin", "employee"] },
     { icon: FileText, href: "/documents", label: "Company", roles: ["admin", "employee"] },
     { icon: Tag, href: "/tags", label: "Tax & Compilance", roles: ["admin"] },
     { icon: Users, href: "/team", label: "Integrations", roles: ["admin"] },
