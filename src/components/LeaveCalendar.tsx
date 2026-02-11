@@ -11,9 +11,14 @@ interface Leave {
   status: string;
 }
 
+interface Holiday {
+  holiday_date: string;
+  description: string;
+}
+
 interface LeaveCalendarProps {
   leaves: Leave[];
-  holidays?: any[];
+  holidays?: Holiday[];
   weeklyOff?: string;
 }
 
@@ -75,15 +80,17 @@ const LeaveCalendar: React.FC<LeaveCalendarProps> = ({ leaves, holidays = [], we
   };
 
   const isHolidayDay = (day: number) => {
-    if (!day) return false;
+    if (!day) return null;
     const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     const checkDate = new Date(year, month, day);
     const dayName = checkDate.toLocaleDateString("en-US", { weekday: "long" });
 
-    const isHolidate = holidays.some(h => h.holiday_date === dateStr);
-    const isWOff = dayName === weeklyOff;
+    const holiday = holidays.find(h => h.holiday_date === dateStr);
+    if (holiday) return holiday;
+    
+    if (dayName === weeklyOff) return dayName;
 
-    return isHolidate || isWOff;
+    return null;
   };
 
   const getLeaveColor = (type: string) => {
@@ -139,17 +146,19 @@ const LeaveCalendar: React.FC<LeaveCalendarProps> = ({ leaves, holidays = [], we
         <div className="grid grid-cols-7 gap-1">
           {days.map((day, index) => {
             const leave = day ? isLeaveDay(day) : null;
-            const holiday = day ? isHolidayDay(day) : false;
+            const holidayInfo = day ? isHolidayDay(day) : null;
+            const isHoliday = !!holidayInfo;
             const currentIsToday = day ? isToday(day) : false;
 
             return (
               <div 
                 key={index} 
+                title={holidayInfo ? (typeof holidayInfo === 'string' ? holidayInfo : holidayInfo.description) : undefined}
                 className={`
-                  aspect-square rounded-xl flex flex-col items-center justify-center relative transition-all duration-300
+                  aspect-square rounded-xl flex flex-col items-center justify-center relative transition-all duration-300 group
                   ${!day ? "bg-transparent" : "hover:scale-105 cursor-default"}
-                  ${day && !leave && !holiday ? "hover:bg-gray-50" : ""}
-                  ${day && holiday && !leave ? "bg-gray-100/50 text-gray-400" : ""}
+                  ${day && !leave && !isHoliday ? "hover:bg-gray-50" : ""}
+                  ${day && isHoliday && !leave ? "bg-gray-100/50 text-gray-400" : ""}
                   ${leave ? getLeaveColor(leave.leave_type) + " shadow-sm" : "text-gray-600"}
                   ${currentIsToday && !leave ? "border-2 border-[#F7D046] font-bold" : ""}
                 `}
@@ -157,10 +166,18 @@ const LeaveCalendar: React.FC<LeaveCalendarProps> = ({ leaves, holidays = [], we
                 {day && (
                   <>
                     <span className={`text-sm ${leave ? "font-bold" : "font-medium"}`}>{day}</span>
+                    
+                    {/* Holiday Label */}
+                    {day && isHoliday && !leave && (
+                      <span className="text-[10px] text-gray-400 font-medium absolute bottom-1 px-1 text-center leading-tight truncate w-full">
+                        {typeof holidayInfo === 'string' ? holidayInfo : holidayInfo.description.replace(/<[^>]*>/g, '')}
+                      </span>
+                    )}
+
                     {leave && (
                        <div className="absolute bottom-1 w-1 h-1 rounded-full bg-white opacity-50"></div>
                     )}
-                    {day && holiday && !leave && (
+                    {day && isHoliday && !leave && (
                        <div className="absolute top-1 right-1 w-1 h-1 rounded-full bg-gray-300"></div>
                     )}
                   </>
