@@ -32,16 +32,20 @@ export async function POST(request: NextRequest) {
     const { data } = body;
 
     const endpoint = "/api/resource/Employee Onboarding";
+    const payload = {
+      job_applicant: data.job_applicant,
+      job_offer: data.job_offer,
+      company: data.company || "Test-Prajjwal",
+      employee_name: data.employee_name,
+      date_of_joining: data.date_of_joining,
+      boarding_begins_on: data.onboarding_start_date || data.date_of_joining
+    };
+
+    console.log("ONB_POST_PAYLOAD:", JSON.stringify(payload, null, 2));
+
     const result = await fetchFromFrappe(endpoint, {
       method: "POST",
-      body: JSON.stringify({
-        job_applicant: data.job_applicant,
-        job_offer: data.job_offer,
-        company: data.company || "Test-Prajjwal",
-        employee_name: data.employee_name,
-        date_of_joining: data.date_of_joining,
-        boarding_begins_on: data.onboarding_start_date || data.date_of_joining
-      })
+      body: JSON.stringify(payload)
     });
     return NextResponse.json(result.data);
   } catch (error: any) {

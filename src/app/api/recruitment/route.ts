@@ -69,3 +69,51 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { type, name, data } = body;
+
+    if (type === "applicant") {
+      const endpoint = `/api/resource/Job Applicant/${name}`;
+      const result = await fetchFromFrappe(endpoint, {
+        method: "PUT",
+        body: JSON.stringify(data)
+      });
+      return NextResponse.json(result.data);
+    }
+
+    return NextResponse.json({ error: "Invalid type" }, { status: 400 });
+  } catch (error: any) {
+    console.error("REC_PUT_ERROR:", error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { type, oldName, newName } = body;
+
+    if (type === "applicant") {
+      // Use the whitelisted frappe.client.rename_doc method
+      const endpoint = "/api/method/frappe.client.rename_doc";
+      const result = await fetchFromFrappe(endpoint, {
+        method: "POST",
+        body: JSON.stringify({
+          doctype: "Job Applicant",
+          old_name: oldName,
+          new_name: newName,
+          merge: 0
+        })
+      });
+      return NextResponse.json(result);
+    }
+
+    return NextResponse.json({ error: "Invalid type" }, { status: 400 });
+  } catch (error: any) {
+    console.error("REC_PATCH_ERROR:", error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

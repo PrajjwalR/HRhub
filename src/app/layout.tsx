@@ -29,6 +29,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${playfair.variable} ${hostGrotesk.variable} antialiased bg-[#FDFDFD] text-[#171717] font-sans`}
+        suppressHydrationWarning
       >
         <AuthProvider>
           <LayoutWrapper>
