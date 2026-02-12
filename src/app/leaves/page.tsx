@@ -165,23 +165,44 @@ export default function LeavesPage() {
                 const remaining = balance.total_leaves_allocated - taken;
                 
                 return (
-                  <div key={index} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                    <p className="text-sm font-medium text-gray-500 mb-2 uppercase tracking-wider">{balance.leave_type}</p>
+                  <div key={index} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative group">
+                    <p className="text-sm font-medium text-gray-500 mb-2 uppercase tracking-wider flex justify-between">
+                      {balance.leave_type}
+                      {balance.leave_type === "Sick Leave" && (
+                        <span className="text-[10px] normal-case bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-bold">
+                          1.5 days/mo
+                        </span>
+                      )}
+                    </p>
                     <div className="flex items-end justify-between">
                       <div>
                         <h3 className="text-3xl font-bold text-[#2C2C2C]">{remaining}</h3>
-                        <p className="text-xs text-gray-400 mt-1">days remaining</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {balance.leave_type === "Sick Leave" 
+                            ? `days available (${balance.total_leaves_allocated} accrued)` 
+                            : "days remaining"}
+                        </p>
                       </div>
                       <div className="w-12 h-12 bg-[#FFF4EE] rounded-xl flex items-center justify-center text-[#FF8C42]">
                         <Calendar size={24} />
                       </div>
                     </div>
-                    <div className="mt-4 w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                    
+                    {/* Progress Bar */}
+                    <div className="mt-4 w-full bg-gray-100 h-1.5 rounded-full overflow-hidden relative">
                       <div 
                         className="bg-[#FF8C42] h-full rounded-full transition-all duration-1000"
-                        style={{ width: `${(remaining / balance.total_leaves_allocated) * 100}%` }}
+                        style={{ width: `${(remaining / (balance.leave_type === "Sick Leave" ? 18 : balance.total_leaves_allocated)) * 100}%` }}
                       ></div>
                     </div>
+
+                    {/* Accrual Info for Sick Leave */}
+                    {balance.leave_type === "Sick Leave" && (
+                      <div className="mt-2 text-[10px] text-gray-400 flex justify-between">
+                         <span>Running Total: {balance.total_leaves_allocated} / 18</span>
+                         <span>Next accrual: 1st of next month</span>
+                      </div>
+                    )}
                   </div>
                 );
               })

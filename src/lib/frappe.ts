@@ -37,8 +37,11 @@ export async function fetchFromFrappe(endpoint: string, options: RequestInit = {
 
   if (!response.ok) {
     const errorText = await response.text();
+    console.error(`Frappe API Error (${response.status}):`, errorText);
     throw new Error(`Frappe API Error: ${response.status} - ${errorText}`);
   }
 
-  return response.json();
+  const data = await response.json();
+  console.log("Frappe API Success:", url);
+  return data;
 }
