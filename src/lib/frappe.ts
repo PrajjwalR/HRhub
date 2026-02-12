@@ -28,7 +28,7 @@ export async function fetchFromFrappe(endpoint: string, options: RequestInit = {
     console.warn("FRAPPE_API_SECRET exists:", !!FRAPPE_API_SECRET);
   }
   
-  console.log("Fetching from:", url);
+  console.log(`[Frappe] ${options.method || 'GET'} ${url}`);
   
   const response = await fetch(url, {
     ...options,
@@ -37,11 +37,11 @@ export async function fetchFromFrappe(endpoint: string, options: RequestInit = {
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error(`Frappe API Error (${response.status}):`, errorText);
+    console.error(`[Frappe Error] ${response.status} ${url}:`, errorText);
     throw new Error(`Frappe API Error: ${response.status} - ${errorText}`);
   }
 
   const data = await response.json();
-  console.log("Frappe API Success:", url);
+  console.log(`[Frappe Success] ${url}`);
   return data;
 }
