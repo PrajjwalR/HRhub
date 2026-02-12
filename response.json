@@ -1,0 +1,29 @@
+Note: Unnecessary use of -X or --request, POST is already inferred.
+* Host localhost:3000 was resolved.
+* IPv6: ::1
+* IPv4: 127.0.0.1
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying [::1]:3000...
+* Connected to localhost (::1) port 3000
+> POST /api/performance HTTP/1.1
+> Host: localhost:3000
+> User-Agent: curl/8.7.1
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 73
+> 
+} [73 bytes data]
+* upload completely sent off: 73 bytes
+100    73    0     0  100    73      0     60  0:00:01  0:00:01 --:--:--    60100    73    0     0  100    73      0     33  0:00:02  0:00:02 --:--:--    33100    73    0     0  100    73      0     22  0:00:03  0:00:03 --:--:--    22< HTTP/1.1 200 OK
+< vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
+< content-type: application/json
+< Date: Thu, 12 Feb 2026 20:58:57 GMT
+< Connection: keep-alive
+< Keep-Alive: timeout=5
+< Transfer-Encoding: chunked
+< 
+100    73    0     0  100    73      0     17  0:00:04  0:00:04 --:--:--    17{ [1688 bytes data]
+100  1749    0  1676  100    73    399     17  0:00:04  0:00:04 --:--:--   417
+* Connection #0 to host localhost left intact
+{"message":"Initiation triggered successfully","details":{"setEmployees":{"name":"Q1 Review 2026","owner":"Administrator","creation":"2026-02-13 01:41:26.089261","modified":"2026-02-13 02:28:13.461434","modified_by":"Administrator","docstatus":0,"idx":0,"cycle_name":"Q1 Review 2026","company":"Test-Prajjwal","status":"Not Started","start_date":"2026-01-01","end_date":"2026-03-31","kra_evaluation_method":"Automated Based on Goal Progress","calculate_final_score_based_on_formula":0,"doctype":"Appraisal Cycle","appraisees":[{"docstatus":0,"idx":1,"employee":"001","employee_name":"Test1","parent":"Q1 Review 2026","parentfield":"appraisees","parenttype":"Appraisal Cycle","doctype":"Appraisee","__islocal":1},{"docstatus":0,"idx":2,"employee":"006","employee_name":"HR","parent":"Q1 Review 2026","parentfield":"appraisees","parenttype":"Appraisal Cycle","doctype":"Appraisee","__islocal":1},{"docstatus":0,"idx":3,"employee":"0001","employee_name":"user","parent":"Q1 Review 2026","parentfield":"appraisees","parenttype":"Appraisal Cycle","doctype":"Appraisee","__islocal":1},{"docstatus":0,"idx":4,"employee":"002","employee_name":"Anil kumar AK47","parent":"Q1 Review 2026","parentfield":"appraisees","parenttype":"Appraisal Cycle","doctype":"Appraisee","__islocal":1},{"docstatus":0,"idx":5,"employee":"EMP-005","employee_name":"John Doe","parent":"Q1 Review 2026","parentfield":"appraisees","parenttype":"Appraisal Cycle","doctype":"Appraisee","__islocal":1},{"docstatus":0,"idx":6,"employee":"EMP-001","employee_name":"Prajjwal Rakesh Chauhan","parent":"Q1 Review 2026","parentfield":"appraisees","parenttype":"Appraisal Cycle","doctype":"Appraisee","__islocal":1}]}}}

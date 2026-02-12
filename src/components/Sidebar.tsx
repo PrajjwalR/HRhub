@@ -13,7 +13,8 @@ import {
   Settings,
   Menu,
   X,
-  CalendarCheck
+  CalendarCheck,
+  TrendingUp
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
@@ -48,6 +49,7 @@ export default function Sidebar() {
     { icon: UserPlus, href: "/recruitment-onboarding", label: "Recruitment & Onboarding", roles: ["admin", "employee"] },
     { icon: CalendarDays, href: "/time-attendance", label: "Time & Attendance", roles: ["admin", "employee"] },
     { icon: CalendarCheck, href: "/leaves", label: "Leaves", roles: ["admin", "employee"] },
+    { icon: TrendingUp, href: "/performance", label: "Performance", roles: ["admin", "employee"] },
     { icon: FileText, href: "/documents", label: "Company", roles: ["admin", "employee"] },
     { icon: Tag, href: "/tags", label: "Tax & Compilance", roles: ["admin"] },
     { icon: Users, href: "/team", label: "Integrations", roles: ["admin"] },
