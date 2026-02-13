@@ -277,7 +277,7 @@ export default function RecruitmentOnboardingPage() {
     <div className="px-8 py-6 bg-[#FAFAFA] min-h-screen">
       <div className="flex items-center justify-between mb-8 max-w-7xl mx-auto">
         <div>
-          <h1 className="text-3xl font-serif text-[#2C2C2C]">Recruitment & Onboarding</h1>
+          <h1 className="text-[25px] font-serif text-[#2C2C2C]">Recruitment & Onboarding</h1>
           <p className="text-gray-500 mt-1">Manage hiring pipelines and new employee transitions</p>
         </div>
         <div className="flex gap-4">

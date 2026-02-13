@@ -70,7 +70,7 @@ export default function Sidebar() {
     <aside 
       ref={sidebarRef}
       className={`min-h-screen border-r border-gray-100 flex flex-col items-start py-8 bg-white fixed left-0 top-0 z-50 transition-all duration-300 ${
-        isExpanded ? "w-64 px-6" : "w-20 px-0 items-center"
+        isExpanded ? "w-72 px-6" : "w-20 px-0 items-center"
       }`}
     >
       {/* Logo - Always Centered */}
@@ -89,10 +89,10 @@ export default function Sidebar() {
       <div className={`w-full flex ${isExpanded ? "justify-end px-3" : "justify-center"} mb-8`}>
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-black"
           aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
         >
-          {isExpanded ? <X size={20} /> : <Menu size={20} />}
+          {isExpanded ? <X size={18} /> : <Menu size={18} />}
         </button>
       </div>
 

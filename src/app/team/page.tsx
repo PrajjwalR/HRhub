@@ -169,7 +169,7 @@ export default function TeamPage() {
     <div className="px-8 py-6 bg-[#FAFAFA] min-h-screen">
       <div className="flex items-center justify-between mb-8 max-w-7xl mx-auto">
         <div>
-          <h1 className="text-3xl font-serif text-[#2C2C2C]">Team Management</h1>
+          <h1 className="text-[25px] font-serif text-[#2C2C2C]">Team Management</h1>
           <p className="text-gray-500 mt-1">Review and manage leave requests from your team</p>
         </div>
       </div>

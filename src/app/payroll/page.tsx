@@ -20,7 +20,7 @@ export default function PayrollPage() {
     <div className="p-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-serif text-[#2C2C2C]">Payroll</h1>
+        <h1 className="text-[25px] font-serif text-[#2C2C2C]">Payroll</h1>
         <Link
           href="/payroll/slips"
           className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-[#2C2C2C] font-medium rounded-lg hover:bg-gray-50 transition-colors"

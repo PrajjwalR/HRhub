@@ -10,7 +10,7 @@ export default function DashboardPage() {
     <div className="p-8 max-w-[1600px] mx-auto">
       {/* Header */}
       <header className="mb-8">
-        <h1 className="text-3xl font-serif text-[#2C2C2C]">Dashboard</h1>
+        <h1 className="text-[25px] font-serif text-[#2C2C2C]">Dashboard</h1>
       </header>
 
       {/* Stats Cards */}

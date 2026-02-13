@@ -70,7 +70,7 @@ export default function TimeAttendancePage() {
   return (
     <div className="px-8 py-6 bg-[#FAFAFA] min-h-screen">
       {/* Page Title */}
-      <h1 className="text-3xl font-serif text-[#2C2C2C] mb-6">Time & Attendance</h1>
+      <h1 className="text-[25px] font-serif text-[#2C2C2C] mb-6">Time & Attendance</h1>
 
       {/* Tabs */}
       <div className="flex items-center gap-8 border-b border-gray-200 mb-8">
