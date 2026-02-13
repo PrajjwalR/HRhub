@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { 
   UserPlus, 
   Briefcase, 
@@ -18,30 +19,10 @@ import {
   FileText
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import RightSidebar from "@/components/RightSidebar";
+import CustomSelect from "@/components/CustomSelect";
 
-// Simple Modal Component
-const Modal = ({ isOpen, onClose, title, children }: { isOpen: boolean; onClose: () => void; title: string, children: React.ReactNode }) => {
-  if (!isOpen) return null;
-  return (
-    <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200"
-      onClick={onClose}
-    >
-      <div 
-        className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="px-8 py-6 border-b border-gray-50 flex items-center justify-between">
-          <h3 className="text-xl font-serif text-[#2C2C2C]">{title}</h3>
-          <button onClick={onClose} className="p-2 hover:bg-gray-50 rounded-full transition-colors">
-            <CloseIcon size={20} className="text-gray-400" />
-          </button>
-        </div>
-        <div className="p-8">{children}</div>
-      </div>
-    </div>
-  );
-};
+// No local Modal needed, using reusable RightSidebar
 
 interface JobOpening {
   name: string;
@@ -79,6 +60,7 @@ interface JobOffer {
 
 export default function RecruitmentOnboardingPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"recruitment" | "onboarding" | "offers">("recruitment");
   const [openings, setOpenings] = useState<JobOpening[]>([]);
   const [applicants, setApplicants] = useState<JobApplicant[]>([]);
@@ -388,17 +370,26 @@ export default function RecruitmentOnboardingPage() {
                 {isLoading ? (
                   [1, 2, 3].map(i => <div key={i} className="p-6 animate-pulse bg-gray-50/50 h-20"></div>)
                 ) : openings.length > 0 ? (
-                  openings.map(job => (
-                    <div key={job.name} className="p-6 hover:bg-gray-50/50 transition-colors flex items-center justify-between group cursor-pointer">
-                      <div>
-                        <p className="text-[#2C2C2C] group-hover:text-[#FF8C42] transition-colors">{job.job_title}</p>
-                        <p className="text-[10px] text-gray-400 mt-1 font-medium">{job.department} • {job.designation}</p>
+                  openings.map(job => {
+                    const jobApplicantCount = applicants.filter(a => a.job_title === job.name).length;
+                    return (
+                      <div 
+                        key={job.name} 
+                        className="p-6 hover:bg-gray-50/50 transition-colors flex items-center justify-between group cursor-pointer"
+                        onClick={() => router.push(`/recruitment-onboarding/${encodeURIComponent(job.name)}`)}
+                      >
+                        <div>
+                          <p className="text-[#2C2C2C] group-hover:text-[#FF8C42] transition-colors">
+                            {job.job_title} {jobApplicantCount > 0 && <span className="text-gray-400">({jobApplicantCount})</span>}
+                          </p>
+                          <p className="text-[10px] text-gray-400 mt-1 font-medium">{job.department} • {job.designation}</p>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] border ${getStatusStyle(job.status)}`}>
+                          {job.status}
+                        </span>
                       </div>
-                      <span className={`px-2 py-0.5 rounded-full text-[9px] border ${getStatusStyle(job.status)}`}>
-                        {job.status}
-                      </span>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <div className="p-12 text-center text-gray-400 italic">No active openings.</div>
                 )}
@@ -582,7 +573,7 @@ export default function RecruitmentOnboardingPage() {
       {/* --- Modals --- */}
       
       {/* Create Opening Modal */}
-      <Modal isOpen={isOpeningModalOpen} onClose={() => setIsOpeningModalOpen(false)} title="Create New Job Opening">
+      <RightSidebar isOpen={isOpeningModalOpen} onClose={() => setIsOpeningModalOpen(false)} title="Create New Job Opening" description="Fill in the details below to create a new job opening in the system.">
         <form onSubmit={handleCreateOpening} className="space-y-6">
           <div className="space-y-1.5 transition-transform duration-300">
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Job Title</label>
@@ -623,10 +614,9 @@ export default function RecruitmentOnboardingPage() {
             Post Job Opening
           </button>
         </form>
-      </Modal>
+      </RightSidebar>
 
-      {/* Add/Edit Applicant Modal */}
-      <Modal 
+      <RightSidebar 
         isOpen={isApplicantModalOpen} 
         onClose={() => {
           setIsApplicantModalOpen(false);
@@ -634,6 +624,7 @@ export default function RecruitmentOnboardingPage() {
           setApplicantForm({ applicant_name: "", email_id: "", job_title: "" });
         }} 
         title={editApplicantName ? "Edit Applicant" : "Add New Applicant"}
+        description="Manage candidate information for your active job openings."
       >
         <form onSubmit={handleAddApplicant} className="space-y-6">
           {editApplicantName && (
@@ -726,41 +717,33 @@ export default function RecruitmentOnboardingPage() {
             {editApplicantName ? "Update Applicant" : "Save Applicant"}
           </button>
         </form>
-      </Modal>
+      </RightSidebar>
 
       {/* Issue Offer Modal */}
-      <Modal isOpen={isOfferModalOpen} onClose={() => setIsOfferModalOpen(false)} title="Issue Job Offer Letter">
+      <RightSidebar isOpen={isOfferModalOpen} onClose={() => setIsOfferModalOpen(false)} title="Issue Job Offer Letter" description="Select an applicant and generate a formal job offer letter.">
         <form onSubmit={handleIssueOffer} className="space-y-6">
-          <div className="space-y-1.5 transition-transform duration-300">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Select Job Applicant</label>
-            <div className="relative group">
-              <select 
-                required
-                className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-[#FF8C42]/20 focus:bg-white transition-all text-sm font-bold text-[#2C2C2C] appearance-none cursor-pointer group-hover:bg-white"
-                value={offerForm.job_applicant}
-                onChange={e => {
-                  const selectedApp = applicants.find(a => a.name === e.target.value);
-                  setOfferForm({
-                    ...offerForm, 
-                    job_applicant: e.target.value,
-                    applicant_name: selectedApp?.applicant_name || "",
-                    designation: selectedApp?.job_title || "Engineer"
-                  });
-                }}
-              >
-                <option value="" disabled className="text-gray-400">Choose an applicant...</option>
-                {applicants.map(app => (
-                  <option key={app.name} value={app.name} className="py-2">
-                    {app.applicant_name} ({app.name})
-                  </option>
-                ))}
-              </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-[#FF8C42] transition-colors">
-                <ChevronRight size={16} className="rotate-90" />
-              </div>
-            </div>
-            <p className="text-[9px] text-gray-400 mt-1 pl-1 italic font-medium">Selecting an applicant will auto-fill their details below.</p>
-          </div>
+          <CustomSelect
+            label="Select Job Applicant"
+            placeholder="Choose an applicant..."
+            options={applicants.map(app => ({
+              value: app.name,
+              label: `${app.applicant_name} (${app.name})`
+            }))}
+            value={offerForm.job_applicant ? { 
+              value: offerForm.job_applicant, 
+              label: applicants.find(a => a.name === offerForm.job_applicant)?.applicant_name || offerForm.job_applicant 
+            } : null}
+            onChange={(selected: any) => {
+              const selectedApp = applicants.find(a => a.name === selected?.value);
+              setOfferForm({
+                ...offerForm, 
+                job_applicant: selected?.value || "",
+                applicant_name: selectedApp?.applicant_name || "",
+                designation: selectedApp?.job_title || "Engineer"
+              });
+            }}
+          />
+          <p className="text-[9px] text-gray-400 -mt-4 pl-1 italic font-medium">Selecting an applicant will auto-fill their details below.</p>
           <div className="space-y-1.5 transition-transform duration-300">
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Applicant Name</label>
             <input 
@@ -800,10 +783,10 @@ export default function RecruitmentOnboardingPage() {
             Issue Offer Letter
           </button>
         </form>
-      </Modal>
+      </RightSidebar>
 
       {/* Start Onboarding Modal */}
-      <Modal isOpen={isOnboardingModalOpen} onClose={() => setIsOnboardingModalOpen(false)} title="Start Employee Onboarding">
+      <RightSidebar isOpen={isOnboardingModalOpen} onClose={() => setIsOnboardingModalOpen(false)} title="Start Employee Onboarding" description="Initiate the onboarding process for a selected candidate with an accepted offer.">
         <form onSubmit={handleStartOnboarding} className="space-y-6">
           <div className="space-y-1.5 transition-transform duration-300">
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Employee Full Name</label>
@@ -815,64 +798,49 @@ export default function RecruitmentOnboardingPage() {
               onChange={e => setOnboardingForm({...onboardingForm, employee_name: e.target.value})}
             />
           </div>
-          <div className="space-y-1.5 transition-transform duration-300">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Select Job Applicant</label>
-            <div className="relative group">
-              <select 
-                required
-                className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all text-sm font-bold text-[#2C2C2C] appearance-none cursor-pointer group-hover:bg-white"
-                value={onboardingForm.job_applicant}
-                onChange={e => {
-                  const selectedApp = applicants.find(a => a.name === e.target.value);
-                  setOnboardingForm({
-                    ...onboardingForm, 
-                    job_applicant: e.target.value,
-                    employee_name: selectedApp?.applicant_name || "",
-                    job_offer: "" // Reset offer when applicant changes
-                  });
-                }}
-              >
-                <option value="" disabled className="text-gray-400">Choose an applicant...</option>
-                {applicants.map(app => (
-                  <option key={app.name} value={app.name}>
-                    {app.applicant_name} ({app.name})
-                  </option>
-                ))}
-              </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-emerald-500 transition-colors">
-                <ChevronRight size={16} className="rotate-90" />
-              </div>
-            </div>
-          </div>
-          <div className="space-y-1.5 transition-transform duration-300">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Select Job Offer (Mandatory)</label>
-            <div className="relative group">
-              <select 
-                required
-                className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all text-sm font-bold text-[#2C2C2C] appearance-none cursor-pointer group-hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
-                value={onboardingForm.job_offer}
-                onChange={e => setOnboardingForm({...onboardingForm, job_offer: e.target.value})}
-                disabled={!onboardingForm.job_applicant}
-              >
-                <option value="" disabled className="text-gray-400">
-                  {!onboardingForm.job_applicant ? "Select applicant first..." : "Select an active offer..."}
-                </option>
-                {offers
-                  .filter(offer => offer.job_applicant === onboardingForm.job_applicant)
-                  .map(offer => (
-                    <option key={offer.name} value={offer.name}>
-                      {offer.name} ({offer.designation} - {offer.status})
-                    </option>
-                  ))}
-              </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-emerald-500 transition-colors">
-                <ChevronRight size={16} className="rotate-90" />
-              </div>
-            </div>
-            {onboardingForm.job_applicant && offers.filter(offer => offer.job_applicant === onboardingForm.job_applicant).length === 0 && (
-              <p className="text-[9px] text-red-500 mt-1 pl-1 font-bold">No active offers found for this applicant. Issue one first!</p>
-            )}
-          </div>
+          <CustomSelect
+            label="Select Job Applicant"
+            placeholder="Choose an applicant..."
+            accentColor="#10B981" // emerald-500
+            options={applicants.map(app => ({
+              value: app.name,
+              label: `${app.applicant_name} (${app.name})`
+            }))}
+            value={onboardingForm.job_applicant ? {
+              value: onboardingForm.job_applicant,
+              label: applicants.find(a => a.name === onboardingForm.job_applicant)?.applicant_name || onboardingForm.job_applicant
+            } : null}
+            onChange={(selected: any) => {
+              const selectedApp = applicants.find(a => a.name === selected?.value);
+              setOnboardingForm({
+                ...onboardingForm, 
+                job_applicant: selected?.value || "",
+                employee_name: selectedApp?.applicant_name || "",
+                job_offer: "" // Reset offer when applicant changes
+              });
+            }}
+          />
+          <CustomSelect
+            label="Select Job Offer (Mandatory)"
+            placeholder={!onboardingForm.job_applicant ? "Select applicant first..." : "Select an active offer..."}
+            accentColor="#10B981" // emerald-500
+            isDisabled={!onboardingForm.job_applicant}
+            options={offers
+              .filter(offer => offer.job_applicant === onboardingForm.job_applicant)
+              .map(offer => ({
+                value: offer.name,
+                label: `${offer.name} (${offer.designation} - ${offer.status})`
+              }))
+            }
+            value={onboardingForm.job_offer ? {
+              value: onboardingForm.job_offer,
+              label: offers.find(o => o.name === onboardingForm.job_offer)?.name || onboardingForm.job_offer
+            } : null}
+            onChange={(selected: any) => setOnboardingForm({...onboardingForm, job_offer: selected?.value || ""})}
+          />
+          {onboardingForm.job_applicant && offers.filter(offer => offer.job_applicant === onboardingForm.job_applicant).length === 0 && (
+            <p className="text-[9px] text-red-500 -mt-4 pl-1 font-bold transition-all">No active offers found for this applicant. Issue one first!</p>
+          )}
           <div className="space-y-1.5 transition-transform duration-300">
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Date of Joining</label>
             <input 
@@ -895,7 +863,7 @@ export default function RecruitmentOnboardingPage() {
             Initiate Onboarding Workflow
           </button>
         </form>
-      </Modal>
+      </RightSidebar>
     </div>
   );
 }

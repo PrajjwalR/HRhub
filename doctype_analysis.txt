@@ -1,0 +1,21 @@
+import fs from 'fs';
+// This script parses the DocType JSON to find required fields
+const docType = {
+  // ... (I will paste the JSON response here manually or just look at it)
+};
+
+// Since the JSON output was truncated, I will look for 'reqd":1' in the output I got.
+// The output showed:
+// "fieldname":"applicant_name" ... "reqd":1
+// "fieldname":"email_id" ... "reqd":1
+// "fieldname":"job_title" ... "reqd":1
+// "fieldname":"status" ... "reqd":0 (Status is NOT required? or maybe has default)
+
+// Let's look closer at the `status` field in the truncated output if possible.
+// Wait, I can't rerun the curl command easily to get the full output without truncation.
+// But I saw `applicant_name`, `email_id` are required.
+// `job_title` is a Link field to `Job Opening`.
+
+// I suspect `job_title` might be the issue. The fieldname is `job_title` in standard Frappe HR?
+// Or is it `job_opening`?
+// Let me check the fieldname for "Job Title" or "Job Opening" in the output I got.

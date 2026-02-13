@@ -1,7 +1,5 @@
-"use client";
-
-import { X } from "lucide-react";
 import { useState } from "react";
+import RightSidebar from "../RightSidebar";
 
 interface OvertimeModalProps {
   isOpen: boolean;
@@ -13,8 +11,6 @@ interface OvertimeModalProps {
 export default function OvertimeModal({ isOpen, onClose, onSave, employeeName }: OvertimeModalProps) {
   const [hours, setHours] = useState<string>("");
 
-  if (!isOpen) return null;
-
   const handleSave = () => {
     const hoursNum = parseFloat(hours) || 0;
     onSave(hoursNum);
@@ -23,51 +19,46 @@ export default function OvertimeModal({ isOpen, onClose, onSave, employeeName }:
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-[400px] shadow-xl">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-bold text-[#2C2C2C]">Overtime</h3>
-          <button 
-            onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X size={20} className="text-gray-400" />
-          </button>
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-600 mb-2">
-            Payment Type
+    <RightSidebar 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      title="Record Overtime"
+      description={`Enter the overtime hours worked by ${employeeName}.`}
+    >
+      <div className="space-y-8 max-w-2xl mx-auto">
+        <div className="space-y-4">
+          <label className="block text-sm font-bold text-gray-700 uppercase tracking-widest text-[10px]">
+            Payment Type & Duration
           </label>
-          <div className="flex gap-3">
+          <div className="flex gap-4">
             <input
               type="number"
               value={hours}
               onChange={(e) => setHours(e.target.value)}
               placeholder="0"
-              className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#F7D046] focus:ring-1 focus:ring-[#F7D046]"
+              className="flex-1 px-4 py-4 border border-gray-200 rounded-2xl text-sm font-bold text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#F7D046]/20 focus:border-[#F7D046] transition-all"
             />
-            <div className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-500 bg-gray-50">
+            <div className="px-6 py-4 border border-gray-200 rounded-2xl text-sm font-black text-gray-400 bg-gray-50 uppercase flex items-center">
               hrs
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4 pt-4 border-t border-gray-50">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+            className="flex-1 px-6 py-4 text-xs font-black text-gray-400 hover:bg-gray-50 rounded-2xl transition-all uppercase tracking-widest border border-gray-100"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="flex-1 px-4 py-2.5 bg-[#F7D046] text-[#2C2C2C] text-sm font-medium rounded-lg hover:bg-[#E5C03E] transition-colors"
+            className="flex-1 px-6 py-4 bg-[#F7D046] text-[#2C2C2C] text-xs font-black rounded-2xl hover:bg-[#E5C03E] transition-all shadow-lg uppercase tracking-widest"
           >
-            Save
+            Save Overtime
           </button>
         </div>
       </div>
-    </div>
+    </RightSidebar>
   );
 }

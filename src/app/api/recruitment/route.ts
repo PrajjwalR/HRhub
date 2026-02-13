@@ -18,8 +18,8 @@ export async function GET(request: NextRequest) {
 
     // Default: fetch both if no type specified
     const [openings, applicants] = await Promise.all([
-      fetchFromFrappe("/api/resource/Job Opening?fields=[\"name\",\"job_title\",\"status\",\"department\",\"designation\"]&limit_page_length=5"),
-      fetchFromFrappe("/api/resource/Job Applicant?fields=[\"name\",\"applicant_name\",\"status\",\"job_title\"]&order_by=creation desc&limit_page_length=5")
+      fetchFromFrappe("/api/resource/Job Opening?fields=[\"name\",\"job_title\",\"status\",\"department\",\"designation\"]&limit_page_length=999"),
+      fetchFromFrappe("/api/resource/Job Applicant?fields=[\"name\",\"applicant_name\",\"status\",\"job_title\"]&order_by=creation desc&limit_page_length=999")
     ]);
 
     return NextResponse.json({
