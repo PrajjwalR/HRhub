@@ -7,19 +7,19 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get("type"); // "openings" or "applicants"
 
     if (type === "openings") {
-      const endpoint = "/api/resource/Job Opening?fields=[\"name\",\"job_title\",\"status\",\"department\",\"designation\",\"posting_date\"]&limit_page_length=20";
+      const endpoint = "/api/resource/Job Opening?fields=[\"name\",\"job_title\",\"status\",\"department\",\"designation\",\"posted_on\"]&limit_page_length=20";
       const data = await fetchFromFrappe(endpoint);
       return NextResponse.json(data.data || []);
     } else if (type === "applicants") {
-      const endpoint = "/api/resource/Job Applicant?fields=[\"name\",\"applicant_name\",\"status\",\"job_title\",\"email_id\",\"phone_number\"]&order_by=creation desc&limit_page_length=20";
+      const endpoint = "/api/resource/Job Applicant?fields=[\"name\",\"applicant_name\",\"status\",\"job_title\",\"email_id\",\"phone_number\",\"creation\"]&order_by=creation desc&limit_page_length=20";
       const data = await fetchFromFrappe(endpoint);
       return NextResponse.json(data.data || []);
     }
 
     // Default: fetch both if no type specified
     const [openings, applicants] = await Promise.all([
-      fetchFromFrappe("/api/resource/Job Opening?fields=[\"name\",\"job_title\",\"status\",\"department\",\"designation\"]&limit_page_length=999"),
-      fetchFromFrappe("/api/resource/Job Applicant?fields=[\"name\",\"applicant_name\",\"status\",\"job_title\"]&order_by=creation desc&limit_page_length=999")
+      fetchFromFrappe("/api/resource/Job Opening?fields=[\"name\",\"job_title\",\"status\",\"department\",\"designation\",\"posted_on\"]&limit_page_length=999"),
+      fetchFromFrappe("/api/resource/Job Applicant?fields=[\"name\",\"applicant_name\",\"status\",\"job_title\",\"creation\"]&order_by=creation desc&limit_page_length=999")
     ]);
 
     return NextResponse.json({

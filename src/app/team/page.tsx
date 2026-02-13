@@ -248,6 +248,7 @@ export default function TeamPage() {
                     <tr className="bg-gray-50/50">
                       <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Employee</th>
                       <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Type</th>
+                      <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center">Applied On</th>
                       <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider text-center">Status</th>
                       <th className="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider text-right">Actions</th>
                     </tr>
@@ -277,6 +278,9 @@ export default function TeamPage() {
                               <span className="font-bold text-[#2C2C2C] text-xs">{leave.leave_type}</span>
                               <span className="text-[10px] text-gray-400">{formatDate(leave.from_date)} - {formatDate(leave.to_date)}</span>
                             </div>
+                          </td>
+                          <td className="px-6 py-5 text-center text-[11px] text-[#2C2C2C]">
+                             {formatDate(leave.posting_date)}
                           </td>
                           <td className="px-6 py-5 text-center">
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-widest ${getStatusStyle(leave.status)}`}>

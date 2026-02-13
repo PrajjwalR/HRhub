@@ -7,17 +7,17 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get("type"); // "processes" or "templates"
 
     if (type === "processes") {
-      const endpoint = "/api/resource/Employee Onboarding?fields=[\"name\",\"job_applicant\",\"employee_name\",\"boarding_status\",\"department\",\"designation\",\"date_of_joining\"]&limit_page_length=20";
+      const endpoint = "/api/resource/Employee Onboarding?fields=[\"name\",\"job_applicant\",\"employee_name\",\"boarding_status\",\"department\",\"designation\",\"date_of_joining\",\"creation\"]&limit_page_length=20";
       const data = await fetchFromFrappe(endpoint);
       return NextResponse.json(data.data || []);
     } else if (type === "templates") {
-      const endpoint = "/api/resource/Employee Onboarding Template?fields=[\"name\",\"department\",\"designation\"]&limit_page_length=20";
+      const endpoint = "/api/resource/Employee Onboarding Template?fields=[\"name\",\"department\",\"designation\",\"creation\"]&limit_page_length=20";
       const data = await fetchFromFrappe(endpoint);
       return NextResponse.json(data.data || []);
     }
 
     // Default: fetch active processes
-    const endpoint = "/api/resource/Employee Onboarding?fields=[\"name\",\"employee_name\",\"boarding_status\",\"date_of_joining\"]&limit_page_length=10";
+    const endpoint = "/api/resource/Employee Onboarding?fields=[\"name\",\"employee_name\",\"boarding_status\",\"date_of_joining\",\"creation\"]&limit_page_length=10";
     const data = await fetchFromFrappe(endpoint);
     return NextResponse.json(data.data || []);
   } catch (error: any) {

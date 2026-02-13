@@ -342,6 +342,18 @@ export default function AssetsPage() {
                       <p className="text-xs font-bold text-[#2C2C2C]">{asset.location || "Central Store"}</p>
                     </div>
                   </div>
+
+                  {asset.purchase_date && (
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center border border-amber-100">
+                        <Calendar size={14} className="text-amber-600" />
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Purchased On</p>
+                        <p className="text-xs font-bold text-[#2C2C2C]">{new Date(asset.purchase_date).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

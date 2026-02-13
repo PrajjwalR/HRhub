@@ -30,7 +30,7 @@ interface JobOpening {
   status: string;
   department: string;
   designation: string;
-  posting_date: string;
+  posted_on?: string;
 }
 
 interface JobApplicant {
@@ -39,6 +39,7 @@ interface JobApplicant {
   status: string;
   job_title: string;
   email_id: string;
+  creation: string;
 }
 
 interface OnboardingProcess {
@@ -47,6 +48,7 @@ interface OnboardingProcess {
   status: string;
   boarding_status: string;
   date_of_joining: string;
+  creation: string;
 }
 
 interface JobOffer {
@@ -382,7 +384,15 @@ export default function RecruitmentOnboardingPage() {
                           <p className="text-[#2C2C2C] group-hover:text-[#FF8C42] transition-colors">
                             {job.job_title} {jobApplicantCount > 0 && <span className="text-gray-400">({jobApplicantCount})</span>}
                           </p>
-                          <p className="text-[10px] text-gray-400 mt-1 font-medium">{job.department} • {job.designation}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-[10px] text-gray-400 font-medium">{job.department} • {job.designation}</p>
+                            {job.posted_on && (
+                              <>
+                                <span className="text-[10px] text-gray-300">•</span>
+                                <p className="text-[10px] text-gray-400 font-medium">Posted {new Date(job.posted_on).toLocaleDateString()}</p>
+                              </>
+                            )}
+                          </div>
                         </div>
                         <span className={`px-2 py-0.5 rounded-full text-[9px] border ${getStatusStyle(job.status)}`}>
                           {job.status}
@@ -421,7 +431,15 @@ export default function RecruitmentOnboardingPage() {
                           >
                             {app.applicant_name}
                           </button>
-                          <p className="text-[10px] text-gray-400 mt-1 font-medium">{app.job_title}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-[10px] text-gray-400 font-medium">{app.job_title}</p>
+                            {app.creation && (
+                              <>
+                                <span className="text-[10px] text-gray-300">•</span>
+                                <p className="text-[10px] text-gray-400 font-medium italic">Applied {new Date(app.creation).toLocaleDateString()}</p>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <span className={`px-2 py-0.5 rounded-full text-[9px] border ${getStatusStyle(app.status)}`}>
@@ -451,6 +469,7 @@ export default function RecruitmentOnboardingPage() {
                   <thead>
                     <tr className="bg-gray-50/50">
                       <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">New Joiner</th>
+                      <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Initiated On</th>
                       <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">DOJ</th>
                       <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Boarding Status</th>
                       <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Actions</th>
@@ -476,6 +495,9 @@ export default function RecruitmentOnboardingPage() {
                                 <p className="text-[9px] text-gray-400 font-medium tracking-normal">ID: {proc.name}</p>
                               </div>
                             </div>
+                          </td>
+                          <td className="px-6 py-5 text-center text-[11px] text-[#2C2C2C]">
+                             {proc.creation ? new Date(proc.creation).toLocaleDateString() : "TBD"}
                           </td>
                           <td className="px-6 py-5 text-center text-[11px] text-[#2C2C2C]">
                              {proc.date_of_joining || "TBD"}
