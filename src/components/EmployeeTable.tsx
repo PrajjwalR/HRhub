@@ -2,6 +2,7 @@
 
 import { MoreHorizontal } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 interface Employee {
   name: string;
@@ -57,7 +58,7 @@ export default function EmployeeTable({ employees, loading }: EmployeeTableProps
             <tr key={emp.name} className="bg-white group hover:bg-gray-50/50 transition-colors">
               {/* Name & Avatar */}
               <td className="py-4 pl-4 rounded-l-2xl border-y border-l border-gray-50 shadow-sm">
-                <div className="flex items-center gap-3">
+                <Link href={`/employees/${emp.name}`} className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0 relative">
                     {emp.image ? (
                         <Image 
@@ -73,10 +74,10 @@ export default function EmployeeTable({ employees, loading }: EmployeeTableProps
                     )}
                   </div>
                   <div>
-                    <p className="font-bold text-[#2C2C2C] text-sm">{emp.employee_name}</p>
+                    <p className="font-bold text-[#2C2C2C] text-sm group-hover:text-[#4A72FF] transition-colors">{emp.employee_name}</p>
                     <p className="text-gray-400 text-xs">{emp.department || "No Department"}</p>
                   </div>
-                </div>
+                </Link>
               </td>
 
               {/* Designation/Type */}

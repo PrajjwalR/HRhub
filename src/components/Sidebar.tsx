@@ -14,7 +14,8 @@ import {
   Menu,
   X,
   CalendarCheck,
-  TrendingUp
+  TrendingUp,
+  Package
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
@@ -47,6 +48,7 @@ export default function Sidebar() {
     { icon: FileText, href: "/my-payslips", label: "My Payslips", roles: ["employee"] },
     { icon: CircleDollarSign, href: "/salary", label: "Expenses", roles: ["admin"] },
     { icon: UserPlus, href: "/recruitment-onboarding", label: "Recruitment & Onboarding", roles: ["admin", "employee"] },
+    { icon: Package, href: "/assets", label: "Assets Management", roles: ["admin", "employee"] },
     { icon: CalendarDays, href: "/time-attendance", label: "Time & Attendance", roles: ["admin", "employee"] },
     { icon: CalendarCheck, href: "/leaves", label: "Leaves", roles: ["admin", "employee"] },
     { icon: TrendingUp, href: "/performance", label: "Performance", roles: ["admin", "employee"] },
