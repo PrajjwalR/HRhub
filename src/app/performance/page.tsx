@@ -33,6 +33,7 @@ interface Appraisal {
   appraisal_cycle: string;
   status?: string; // Optional since it's not returned by the API
   total_score: number;
+  appraisal_amount?: number;
 }
 
 const Modal = ({ isOpen, onClose, title, children }: { isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }) => {
@@ -65,8 +66,14 @@ export default function PerformanceDashboard() {
 
   // Modal states
   const [isCycleModalOpen, setIsCycleModalOpen] = useState(false);
+  const [isInitiateModalOpen, setIsInitiateModalOpen] = useState(false);
   const [cycleForm, setCycleForm] = useState({ cycle_name: "", start_date: "", end_date: "", company: "Test-Prajjwal" });
   const [selectedCycle, setSelectedCycle] = useState<string | null>(null);
+
+  // Amount Modal state
+  const [isAmountModalOpen, setIsAmountModalOpen] = useState(false);
+  const [editingAppraisal, setEditingAppraisal] = useState<Appraisal | null>(null);
+  const [newAmount, setNewAmount] = useState<string>("");
 
   const fetchData = async () => {
     try {
@@ -120,15 +127,16 @@ export default function PerformanceDashboard() {
     }
   };
 
-  const handleInitiateAppraisals = async () => {
+  const handleInitiateAppraisals = async (cycleName?: string) => {
     if (!cycles.length) {
       alert("Please create an appraisal cycle first.");
       return;
     }
 
-    const cycleToUse = selectedCycle || cycles[0].name;
+    const cycleToUse = cycleName || selectedCycle || cycles[0].name;
+    const cycleLabel = cycles.find(c => c.name === cycleToUse)?.cycle_name || cycleToUse;
     
-    if (!confirm(`Generate individual appraisal records for all employees using cycle "${cycleToUse}"?`)) return;
+    if (!confirm(`Generate individual appraisal records for all employees using cycle "${cycleLabel}"?`)) return;
 
     try {
       setIsSubmitting(true);
@@ -147,12 +155,52 @@ export default function PerformanceDashboard() {
       }
 
       alert("Appraisal initiation triggered! This might take a few moments to process on the server.");
+      setIsInitiateModalOpen(false);
       fetchData();
     } catch (err: any) {
       alert(err.message);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleUpdateAmount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAppraisal) return;
+
+    try {
+      setIsSubmitting(true);
+      const res = await fetch("/api/performance", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          name: editingAppraisal.name, 
+          data: { appraisal_amount: parseFloat(newAmount) || 0 } 
+        })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to update amount");
+      }
+
+      setIsAmountModalOpen(false);
+      setEditingAppraisal(null);
+      setNewAmount("");
+      fetchData();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0
+    }).format(amount);
   };
 
   const getStatusStyle = (status: string) => {
@@ -231,6 +279,15 @@ export default function PerformanceDashboard() {
             <button className="p-3 bg-gray-50/80 hover:bg-white border border-transparent hover:border-gray-100 rounded-2xl transition-all text-gray-500 hover:text-[#2C2C2C]">
               <Filter size={20} />
             </button>
+            {activeTab === "appraisals" && (
+              <button 
+                onClick={() => setIsInitiateModalOpen(true)}
+                className="bg-[#FF8C42] text-white px-5 py-3 rounded-2xl flex items-center gap-2 hover:bg-[#F27A2E] transition-all shadow-md shadow-[#FF8C42]/10 font-bold text-xs uppercase tracking-widest whitespace-nowrap ml-2"
+              >
+                <PlusCircle size={14} />
+                Initiate Appraisals
+              </button>
+            )}
           </div>
         </div>
 
@@ -287,9 +344,17 @@ export default function PerformanceDashboard() {
                       </span>
                     </td>
                     <td className="px-10 py-6 text-right">
-                      <button className="p-2 text-gray-400 hover:text-[#2C2C2C] hover:bg-gray-100 rounded-xl transition-all">
-                        <MoreVertical size={18} />
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => handleInitiateAppraisals(cycle.name)}
+                          className="bg-emerald-50 hover:bg-emerald-600 text-emerald-600 hover:text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                        >
+                          Initiate
+                        </button>
+                        <button className="p-2 text-gray-400 hover:text-[#2C2C2C] hover:bg-gray-100 rounded-xl transition-all">
+                          <MoreVertical size={18} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -302,6 +367,7 @@ export default function PerformanceDashboard() {
                   <th className="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Employee</th>
                   <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Cycle</th>
                   <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Score</th>
+                  <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Amount</th>
                   <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
                   <th className="px-10 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Actions</th>
                 </tr>
@@ -309,7 +375,7 @@ export default function PerformanceDashboard() {
               <tbody className="divide-y divide-gray-50">
                 {appraisals.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-10 py-20 text-center">
+                    <td colSpan={6} className="px-10 py-20 text-center">
                       <div className="flex flex-col items-center gap-4">
                         <div className="w-16 h-16 bg-gray-50 rounded-3xl flex items-center justify-center text-gray-300">
                           <Users size={32} />
@@ -334,7 +400,7 @@ export default function PerformanceDashboard() {
                             </select>
                             
                             <button 
-                              onClick={handleInitiateAppraisals}
+                              onClick={() => handleInitiateAppraisals()}
                               disabled={isSubmitting}
                               className="bg-[#FF8C42] hover:bg-[#F27A2E] disabled:bg-gray-200 text-white px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-[#FF8C42]/20 hover:shadow-[#FF8C42]/40 transition-all flex items-center gap-3 active:scale-95"
                             >
@@ -375,14 +441,26 @@ export default function PerformanceDashboard() {
                         {appraisal.total_score || 0}
                       </div>
                     </td>
+                    <td className="px-6 py-6">
+                      <p className="text-sm font-bold text-emerald-600">
+                        {formatCurrency(appraisal.appraisal_amount || 0)}
+                      </p>
+                    </td>
                     <td className="px-6 py-6 font-bold">
                       <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusStyle(appraisal.status || "Draft")}`}>
                         {appraisal.status || "Draft"}
                       </span>
                     </td>
                     <td className="px-10 py-6 text-right">
-                      <button className="bg-gray-50 hover:bg-[#2C2C2C] text-gray-400 hover:text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
-                        View Details
+                      <button 
+                        onClick={() => {
+                          setEditingAppraisal(appraisal);
+                          setNewAmount((appraisal.appraisal_amount || 0).toString());
+                          setIsAmountModalOpen(true);
+                        }}
+                        className="bg-gray-50 hover:bg-[#2C2C2C] text-gray-400 hover:text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                      >
+                        Update Amount
                       </button>
                     </td>
                   </tr>
@@ -442,6 +520,87 @@ export default function PerformanceDashboard() {
             Create Cycle
           </button>
         </form>
+      </Modal>
+
+      <Modal 
+        isOpen={isAmountModalOpen} 
+        onClose={() => setIsAmountModalOpen(false)} 
+        title="Update Appraisal Amount"
+      >
+        <form onSubmit={handleUpdateAmount} className="space-y-6">
+          <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 mb-6">
+            <p className="text-xs text-emerald-800 font-medium">Updating increment amount for:</p>
+            <p className="text-lg font-serif text-emerald-900 mt-1">{editingAppraisal?.employee_name}</p>
+            <p className="text-[10px] text-emerald-600 font-mono mt-0.5">{editingAppraisal?.employee}</p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Increment Amount (INR)</label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+              <input 
+                required
+                type="number" 
+                className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-10 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-[#FF8C42]/20 focus:bg-white transition-all text-sm font-bold text-[#2C2C2C]"
+                placeholder="0.00"
+                value={newAmount}
+                onChange={e => setNewAmount(e.target.value)}
+              />
+            </div>
+            <p className="text-[10px] text-gray-400 mt-2 pl-1 italic">Enter the monetary adjustment resulting from this performance review.</p>
+          </div>
+          
+          <button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="w-full bg-[#2C2C2C] hover:bg-[#404040] text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-black/10 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {isSubmitting && <Loader2 className="animate-spin" size={16} />}
+            Confirm Update
+          </button>
+        </form>
+      </Modal>
+
+      <Modal 
+        isOpen={isInitiateModalOpen} 
+        onClose={() => setIsInitiateModalOpen(false)} 
+        title="Initiate Employee Appraisals"
+      >
+        <div className="space-y-6">
+          <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100">
+            <p className="text-xs text-amber-800 font-medium leading-relaxed">
+              Generating appraisals will create individual records for all eligible employees based on the selected cycle's configuration.
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Select Appraisal Cycle</label>
+            <select 
+              value={selectedCycle || (cycles[0]?.name || "")}
+              onChange={(e) => setSelectedCycle(e.target.value)}
+              className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-[#FF8C42]/20 focus:bg-white transition-all text-sm font-bold text-[#2C2C2C]"
+            >
+              <option value="" disabled>Choose a cycle...</option>
+              {cycles.map((c) => (
+                <option key={c.name} value={c.name}>
+                  {c.cycle_name}
+                </option>
+              ))}
+            </select>
+            {cycles.length === 0 && (
+              <p className="text-[10px] text-red-500 mt-2 pl-1">No cycles found. Please create one first.</p>
+            )}
+          </div>
+          
+          <button 
+            onClick={() => handleInitiateAppraisals()}
+            disabled={isSubmitting || !cycles.length || (selectedCycle === null && cycles.length > 0 && !cycles[0]?.name)}
+            className="w-full bg-[#FF8C42] hover:bg-[#F27A2E] text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-[#FF8C42]/10 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : <PlusCircle size={16} />}
+            Confirm & Initiate
+          </button>
+        </div>
       </Modal>
     </div>
   );

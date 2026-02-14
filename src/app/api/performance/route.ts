@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
       const data = await fetchFromFrappe(endpoint);
       return NextResponse.json(data.data || []);
     } else if (type === "appraisals") {
-      const endpoint = "/api/resource/Appraisal?fields=[\"name\",\"employee\",\"employee_name\",\"appraisal_cycle\",\"total_score\"]&order_by=creation desc";
+      const endpoint = "/api/resource/Appraisal?fields=[\"name\",\"employee\",\"employee_name\",\"appraisal_cycle\",\"total_score\",\"appraisal_amount\"]&order_by=creation desc";
       const data = await fetchFromFrappe(endpoint);
       return NextResponse.json(data.data || []);
     }
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     // Default: fetch both
     const [cyclesRes, appraisalsRes] = await Promise.all([
       fetchFromFrappe("/api/resource/Appraisal Cycle?fields=[\"name\",\"cycle_name\",\"start_date\",\"end_date\"]&order_by=creation desc"),
-      fetchFromFrappe("/api/resource/Appraisal?fields=[\"name\",\"employee\",\"employee_name\",\"appraisal_cycle\",\"total_score\"]&order_by=creation desc")
+      fetchFromFrappe("/api/resource/Appraisal?fields=[\"name\",\"employee\",\"employee_name\",\"appraisal_cycle\",\"total_score\",\"appraisal_amount\"]&order_by=creation desc")
     ]);
 
     return NextResponse.json({
@@ -164,6 +164,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid type" }, { status: 400 });
   } catch (error: any) {
     console.error("PERF_POST_ERROR:", error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { name, data } = body;
+
+    if (!name) throw new Error("Missing record name");
+
+    const endpoint = `/api/resource/Appraisal/${name}`;
+    const result = await fetchFromFrappe(endpoint, {
+      method: "PUT",
+      body: JSON.stringify(data)
+    });
+
+    return NextResponse.json(result.data);
+  } catch (error: any) {
+    console.error("PERF_PUT_ERROR:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
