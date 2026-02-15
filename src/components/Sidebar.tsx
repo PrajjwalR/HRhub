@@ -15,7 +15,9 @@ import {
   X,
   CalendarCheck,
   TrendingUp,
-  Package
+  Package,
+  ShieldCheck,
+  Building2
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
@@ -52,8 +54,8 @@ export default function Sidebar() {
     { icon: CalendarDays, href: "/time-attendance", label: "Time & Attendance", roles: ["admin", "employee"] },
     { icon: CalendarCheck, href: "/leaves", label: "Leaves", roles: ["admin", "employee"] },
     { icon: TrendingUp, href: "/performance", label: "Performance", roles: ["admin", "employee"] },
-    { icon: FileText, href: "/documents", label: "Company", roles: ["admin", "employee"] },
-    { icon: Tag, href: "/tags", label: "Tax & Compilance", roles: ["admin"] },
+    { icon: Building2, href: "/company", label: "Company", roles: ["admin", "employee"] },
+    { icon: ShieldCheck, href: "/tax-compliance", label: "Tax & Compliance", roles: ["admin"] },
     { icon: Users, href: "/team", label: "Integrations", roles: ["admin"] },
     { icon: Settings, href: "/settings", label: "Settings", roles: ["admin"] },
   ];
