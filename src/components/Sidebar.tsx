@@ -48,7 +48,7 @@ export default function Sidebar() {
     { icon: LayoutGrid, href: "/dashboard", label: "Dashboard", roles: ["admin", "employee"] },
     { icon: Wallet, href: "/payroll", label: "Payroll", roles: ["admin"] },
     { icon: FileText, href: "/my-payslips", label: "My Payslips", roles: ["employee"] },
-    { icon: CircleDollarSign, href: "/salary", label: "Expenses", roles: ["admin"] },
+    { icon: CircleDollarSign, href: "/expenses", label: "Expenses", roles: ["admin", "employee"] },
     { icon: UserPlus, href: "/recruitment-onboarding", label: "Recruitment & Onboarding", roles: ["admin", "employee"] },
     { icon: Package, href: "/assets", label: "Assets Management", roles: ["admin", "employee"] },
     { icon: CalendarDays, href: "/time-attendance", label: "Time & Attendance", roles: ["admin", "employee"] },
