@@ -17,7 +17,7 @@ export default function ActivityLog() {
       id: "1",
       timestamp: "Jun 09th 13:15",
       user: "John Doe",
-      action: "set Emily's Anderson salary rate to $3,000",
+      action: "set Emily's Anderson salary rate to ₹3,000",
       status: "completed"
     },
     {
@@ -31,7 +31,7 @@ export default function ActivityLog() {
       id: "3",
       timestamp: "Jun 08th 20:48",
       user: "Mike Poe and Steve Fawcik",
-      action: "edited policy to $2,000k",
+      action: "edited policy to ₹2,000k",
       status: "info"
     }
   ];

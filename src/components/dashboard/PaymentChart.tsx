@@ -66,7 +66,7 @@ export default function PaymentChart() {
               <span className="text-xs text-gray-500 font-sans">Total cost</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-[#2C2C2C] font-sans">$37K</span>
+              <span className="text-xl font-bold text-[#2C2C2C] font-sans">₹37K</span>
               <span className="text-xs text-green-600 font-medium">+4.5%</span>
             </div>
           </div>
@@ -77,7 +77,7 @@ export default function PaymentChart() {
               <span className="text-xs text-gray-500 font-sans">Salary</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-[#2C2C2C] font-sans">$25K</span>
+              <span className="text-xl font-bold text-[#2C2C2C] font-sans">₹25K</span>
               <span className="text-xs text-green-600 font-medium">+6.5%</span>
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function PaymentChart() {
               <span className="text-xs text-gray-500 font-sans">Other</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-[#2C2C2C] font-sans">$15K</span>
+              <span className="text-xl font-bold text-[#2C2C2C] font-sans">₹15K</span>
               <span className="text-xs text-red-600 font-medium">+6.5%</span>
             </div>
           </div>

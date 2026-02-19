@@ -12,8 +12,12 @@ import {
   MoreVertical,
   ArrowUpRight,
   Loader2,
-  DollarSign
+  IndianRupee,
+  Eye,
+  Edit,
+  Trash2
 } from "lucide-react";
+import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/react";
 
 interface ExpenseItem {
   expense_date: string;
@@ -38,6 +42,8 @@ export default function ExpensesPage() {
   const [claims, setClaims] = useState<ExpenseClaim[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedClaim, setSelectedClaim] = useState<ExpenseClaim | null>(null);
+  const [drawerMode, setDrawerMode] = useState<'create' | 'view' | 'edit'>('create');
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -67,6 +73,30 @@ export default function ExpensesPage() {
     }
   };
 
+  const handleCreate = () => {
+    setSelectedClaim(null);
+    setDrawerMode('create');
+    setIsDrawerOpen(true);
+  };
+
+  const handleView = (claim: ExpenseClaim) => {
+    setSelectedClaim(claim);
+    setDrawerMode('view');
+    setIsDrawerOpen(true);
+  };
+
+  const handleEdit = (claim: ExpenseClaim) => {
+    setSelectedClaim(claim);
+    setDrawerMode('edit');
+    setIsDrawerOpen(true);
+  };
+
+  const handleDelete = async (claim: ExpenseClaim) => {
+    if (!confirm(`Are you sure you want to delete expense claim ${claim.name}?`)) return;
+    // TODO: Implement API delete
+    alert("Delete functionality coming soon via API");
+  };
+
   const filteredClaims = claims.filter(claim => 
     claim.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     claim.employee.toLowerCase().includes(searchQuery.toLowerCase())
@@ -75,7 +105,7 @@ export default function ExpensesPage() {
   const stats = [
     { label: "Total Pending", value: claims.filter(c => c.approval_status === "Draft").length, icon: Clock, color: "text-amber-500", bg: "bg-amber-50" },
     { label: "Total Approved", value: claims.filter(c => c.approval_status === "Approved").length, icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-50" },
-    { label: "Total Paid", value: claims.filter(c => c.status === "Paid").length, icon: DollarSign, color: "text-blue-500", bg: "bg-blue-50" },
+    { label: "Total Paid", value: claims.filter(c => c.status === "Paid").length, icon: IndianRupee, color: "text-blue-500", bg: "bg-blue-50" },
   ];
 
   return (
@@ -87,7 +117,7 @@ export default function ExpensesPage() {
           <p className="text-slate-500">Track and manage your reimbursement claims</p>
         </div>
         <button 
-          onClick={() => setIsDrawerOpen(true)}
+          onClick={handleCreate}
           className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
         >
           <Plus size={18} />
@@ -147,7 +177,7 @@ export default function ExpensesPage() {
               </p>
             </div>
             <button 
-              onClick={() => setIsDrawerOpen(true)}
+              onClick={handleCreate}
               className="mt-4 flex items-center gap-2 text-indigo-600 font-medium hover:text-indigo-700"
             >
               <Plus size={18} />
@@ -195,9 +225,60 @@ export default function ExpensesPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
-                        <MoreVertical size={18} />
-                      </button>
+                      <Menu>
+                        <MenuButton className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
+                          <MoreVertical size={18} />
+                        </MenuButton>
+                        <MenuItems anchor="bottom end" className="w-48 origin-top-right divide-y divide-gray-100 rounded-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+                          <div className="px-1 py-1">
+                            <MenuItem>
+                              {({ focus }) => (
+                                <button
+                                  onClick={() => handleView(claim)}
+                                  className={`${
+                                    focus ? "bg-indigo-50 text-indigo-600" : "text-slate-700"
+                                  } group flex w-full items-center rounded-lg px-2 py-2 text-sm`}
+                                >
+                                  <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
+                                  View Details
+                                </button>
+                              )}
+                            </MenuItem>
+                            {(claim.approval_status === "Draft" || claim.approval_status === "Rejected") && (
+                              <MenuItem>
+                                {({ focus }) => (
+                                  <button
+                                    onClick={() => handleEdit(claim)}
+                                    className={`${
+                                      focus ? "bg-indigo-50 text-indigo-600" : "text-slate-700"
+                                    } group flex w-full items-center rounded-lg px-2 py-2 text-sm`}
+                                  >
+                                    <Edit className="mr-2 h-4 w-4" aria-hidden="true" />
+                                    Edit Claim
+                                  </button>
+                                )}
+                              </MenuItem>
+                            )}
+                          </div>
+                          {claim.approval_status === "Draft" && (
+                            <div className="px-1 py-1">
+                              <MenuItem>
+                                {({ focus }) => (
+                                  <button
+                                    onClick={() => handleDelete(claim)}
+                                    className={`${
+                                      focus ? "bg-rose-50 text-rose-600" : "text-rose-600"
+                                    } group flex w-full items-center rounded-lg px-2 py-2 text-sm`}
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
+                                    Delete
+                                  </button>
+                                )}
+                              </MenuItem>
+                            </div>
+                          )}
+                        </MenuItems>
+                      </Menu>
                     </td>
                   </tr>
                 ))}
@@ -211,7 +292,9 @@ export default function ExpensesPage() {
       <ExpenseClaimDrawer 
         isOpen={isDrawerOpen} 
         onClose={() => setIsDrawerOpen(false)} 
-        onSuccess={fetchClaims} 
+        onSuccess={fetchClaims}
+        mode={drawerMode}
+        initialData={selectedClaim}
       />
     </div>
   );

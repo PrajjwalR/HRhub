@@ -24,7 +24,7 @@ const payrollData: PayrollItem[] = [
     dayOfWeek: "Wed",
     payDate: "31th Jul 2022",
     employees: 22,
-    totalPayment: "$23,960.00",
+    totalPayment: "₹23,960.00",
     status: "late",
     approvedDate: null,
     action: "Run Late Payroll"
@@ -36,7 +36,7 @@ const payrollData: PayrollItem[] = [
     dayOfWeek: "Mon",
     payDate: "30th Jun 2022",
     employees: 22,
-    totalPayment: "$2,000.00",
+    totalPayment: "₹2,000.00",
     status: "draft",
     approvedDate: null,
     action: "Setup"
@@ -48,7 +48,7 @@ const payrollData: PayrollItem[] = [
     dayOfWeek: "Tue",
     payDate: "30th May 2022",
     employees: 22,
-    totalPayment: "$23,960.00",
+    totalPayment: "₹23,960.00",
     status: "paid",
     approvedDate: "30th May 2020"
   },
@@ -59,7 +59,7 @@ const payrollData: PayrollItem[] = [
     dayOfWeek: "Thu",
     payDate: "15th April 2022",
     employees: 22,
-    totalPayment: "$2,500.00",
+    totalPayment: "₹2,500.00",
     status: "paid",
     approvedDate: "14th Apr 2020"
   },
@@ -70,7 +70,7 @@ const payrollData: PayrollItem[] = [
     dayOfWeek: "Fri",
     payDate: "30th April 2022",
     employees: 22,
-    totalPayment: "$23,960.00",
+    totalPayment: "₹23,960.00",
     status: "paid",
     approvedDate: "30th Apr 2020"
   },
@@ -81,7 +81,7 @@ const payrollData: PayrollItem[] = [
     dayOfWeek: "Sat",
     payDate: "29th March 2022",
     employees: 22,
-    totalPayment: "$23,960.00",
+    totalPayment: "₹23,960.00",
     status: "paid",
     approvedDate: "15th Mar 2020"
   },
@@ -92,7 +92,7 @@ const payrollData: PayrollItem[] = [
     dayOfWeek: "Wed",
     payDate: "29th March 2022",
     employees: 22,
-    totalPayment: "$3,960.00",
+    totalPayment: "₹3,960.00",
     status: "paid",
     approvedDate: "30th Mar 2020"
   },

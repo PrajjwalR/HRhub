@@ -207,7 +207,7 @@ export default function Step2TotalHours({ employees, onUpdateEmployees, onNext, 
                     </div>
                     {employee.additionalEarningsType && (
                       <div className="flex items-center gap-1">
-                        <span className="text-xs text-gray-400">$</span>
+                        <span className="text-xs text-gray-400">₹</span>
                         <input
                           type="number"
                           value={employee.additionalEarnings}

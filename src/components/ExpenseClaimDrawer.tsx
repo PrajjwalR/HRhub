@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Plus, Trash2, Loader2, Calendar, Building2, User, Tag, FileText, CheckCircle2 } from "lucide-react";
+import { X, Plus, Trash2, Loader2, Calendar, Building2, User, Tag, FileText, CheckCircle2, IndianRupee } from "lucide-react";
 import CustomSelect from "./CustomSelect";
 
 interface ExpenseItem {
@@ -26,9 +26,11 @@ interface ExpenseClaimDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  mode?: 'create' | 'view' | 'edit';
+  initialData?: any;
 }
 
-export default function ExpenseClaimDrawer({ isOpen, onClose, onSuccess }: ExpenseClaimDrawerProps) {
+export default function ExpenseClaimDrawer({ isOpen, onClose, onSuccess, mode = 'create', initialData }: ExpenseClaimDrawerProps) {
   const [expenseTypes, setExpenseTypes] = useState<ExpenseType[]>([]);
   const [users, setUsers] = useState<FrappeUser[]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -44,12 +46,33 @@ export default function ExpenseClaimDrawer({ isOpen, onClose, onSuccess }: Expen
     if (isOpen) {
       fetchExpenseTypes();
       fetchUsers();
-      // Add one empty expense row
-      if (formData.expenses.length === 0) {
-        addExpenseRow();
+      
+      if (initialData && (mode === 'view' || mode === 'edit')) {
+         // Populate form with initialData
+         // Note: We might need to fetch full details if initialData is summary
+         // For now assuming initialData has what we need or we map it
+         // Verification: We need to see structure of initialData vs formData
+         // Let's assume we need to resets if create, or populate if view/edit
+         setFormData({
+            employee: initialData.employee || "",
+            expense_approver: initialData.expense_approver || "", // We might need to fetch this if not in list
+            company: "HR_Hub",
+            posting_date: initialData.posting_date || new Date().toISOString().split('T')[0],
+            expenses: initialData.expenses || [] 
+         });
+      } else {
+          // Reset for create
+          setFormData({
+            employee: "",
+            expense_approver: "",
+            company: "HR_Hub",
+            posting_date: new Date().toISOString().split('T')[0],
+            expenses: [] 
+          });
+          addExpenseRow();
       }
     }
-  }, [isOpen]);
+  }, [isOpen, mode, initialData]);
 
   const fetchExpenseTypes = async () => {
     try {
@@ -130,8 +153,12 @@ export default function ExpenseClaimDrawer({ isOpen, onClose, onSuccess }: Expen
       <div className="relative w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col p-8 overflow-hidden animate-in slide-in-from-right duration-300">
         <div className="flex justify-between items-center mb-8 pb-4 border-b">
           <div>
-            <h2 className="text-xl font-bold text-slate-900">New Expense Claim</h2>
-            <p className="text-sm text-slate-500">Add details of your expenses for reimbursement</p>
+            <h2 className="text-xl font-bold text-slate-900">
+              {mode === 'view' ? 'Expense Claim Details' : mode === 'edit' ? 'Edit Expense Claim' : 'New Expense Claim'}
+            </h2>
+            <p className="text-sm text-slate-500">
+              {mode === 'view' ? 'View details of your expense claim' : 'Add details of your expenses for reimbursement'}
+            </p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
             <X size={20} className="text-slate-500" />
@@ -149,9 +176,10 @@ export default function ExpenseClaimDrawer({ isOpen, onClose, onSuccess }: Expen
                       required
                       type="text"
                       placeholder="e.g. EMP-001"
-                      className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-900"
                       value={formData.employee}
                       onChange={e => setFormData({ ...formData, employee: e.target.value })}
+                      disabled={mode === 'view'}
+                      className={`w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-900 ${mode === 'view' ? 'opacity-70 cursor-not-allowed' : ''}`}
                     />
                 </div>
               </div>
@@ -164,6 +192,7 @@ export default function ExpenseClaimDrawer({ isOpen, onClose, onSuccess }: Expen
                     onChange={(option: any) => setFormData({ ...formData, expense_approver: option?.value || "" })}
                     placeholder="Select Approver"
                     accentColor="#4F46E5" // Indigo-600
+                    isDisabled={mode === 'view'}
                   />
                 </div>
               </div>
@@ -177,9 +206,10 @@ export default function ExpenseClaimDrawer({ isOpen, onClose, onSuccess }: Expen
                   <input 
                     required
                     type="date"
-                    className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-900"
                     value={formData.posting_date}
                     onChange={e => setFormData({ ...formData, posting_date: e.target.value })}
+                    disabled={mode === 'view'}
+                    className={`w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-900 ${mode === 'view' ? 'opacity-70 cursor-not-allowed' : ''}`}
                   />
                 </div>
               </div>
@@ -203,6 +233,7 @@ export default function ExpenseClaimDrawer({ isOpen, onClose, onSuccess }: Expen
                   <Tag size={18} className="text-indigo-600" />
                   Expense Items
                 </h3>
+                {mode !== 'view' && (
                 <button 
                   type="button"
                   onClick={addExpenseRow}
@@ -211,6 +242,7 @@ export default function ExpenseClaimDrawer({ isOpen, onClose, onSuccess }: Expen
                   <Plus size={14} />
                   Add Row
                 </button>
+                )}
               </div>
 
               <div className="space-y-4">
@@ -265,9 +297,10 @@ export default function ExpenseClaimDrawer({ isOpen, onClose, onSuccess }: Expen
                           required
                           type="number"
                           placeholder="0.00"
-                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-500 text-slate-900"
+                          className={`w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-500 text-slate-900 ${mode === 'view' ? 'opacity-70 cursor-not-allowed' : ''}`}
                           value={expense.amount}
                           onChange={e => updateExpenseRow(idx, "amount", parseFloat(e.target.value))}
+                          disabled={mode === 'view'}
                         />
                       </div>
                     </div>
@@ -285,6 +318,7 @@ export default function ExpenseClaimDrawer({ isOpen, onClose, onSuccess }: Expen
             >
               Cancel
             </button>
+            {mode !== 'view' && (
             <button 
               type="submit"
               disabled={isSaving}
@@ -298,10 +332,11 @@ export default function ExpenseClaimDrawer({ isOpen, onClose, onSuccess }: Expen
               ) : (
                 <>
                   <FileText size={18} />
-                  Submit Claim
+                  {mode === 'edit' ? 'Update Claim' : 'Submit Claim'}
                 </>
               )}
             </button>
+            )}
           </div>
         </form>
       </div>
