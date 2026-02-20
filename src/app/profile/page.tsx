@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, Phone, MapPin, Building, Hash, Calendar, CreditCard, Landmark, Edit2, Save, X, Loader2, Monitor } from "lucide-react";
+import { Mail, Phone, MapPin, Building, Hash, Calendar, CreditCard, Landmark, Edit2, Save, X, Loader2, Monitor, Lock, KeyRound, ShieldCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -35,9 +35,19 @@ export default function ProfilePage() {
     cell_number?: string;
     personal_email?: string;
   } | null>(null);
-  const [activeTab, setActiveTab] = useState<"profile" | "assets">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "assets" | "security">("profile");
   const [assets, setAssets] = useState<any[]>([]);
   const [isLoadingAssets, setIsLoadingAssets] = useState(false);
+  
+  // Password Reset State
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   const profileUser = {
     name: employeeData?.employee_name || user?.name || "Employee",
@@ -193,6 +203,44 @@ export default function ProfilePage() {
     return "****" + number.slice(-4);
   };
 
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError(null);
+    setPasswordSuccess(null);
+
+    // Client-side validation
+    if (!passwordForm.currentPassword) {
+      setPasswordError("Current password is required");
+      return;
+    }
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters long");
+      return;
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError("New passwords do not match");
+      return;
+    }
+
+    setIsChangingPassword(true);
+
+    // Simulate API call (or implement real one if endpoint exists)
+    try {
+      // For now, we'll simulate a delay and success
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // TODO: Replace with actual API call:
+      // await fetch('/api/user/change-password', { method: 'POST', ... });
+
+      setPasswordSuccess("Password updated successfully");
+      setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (err: any) {
+      setPasswordError("Failed to update password. Please check your current password and try again.");
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
   return (
     <div className="p-8 max-w-4xl mx-auto pb-20">
       <div className="flex items-center justify-between mb-8">
@@ -210,10 +258,16 @@ export default function ProfilePage() {
           >
             My Assets
           </button>
+          <button 
+            onClick={() => setActiveTab("security")}
+            className={`px-6 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-widest ${activeTab === "security" ? "bg-[#4A72FF] text-white shadow-md shadow-blue-100" : "text-gray-400 hover:text-gray-600"}`}
+          >
+            Security
+          </button>
         </div>
       </div>
 
-      {activeTab === "profile" ? (
+      {activeTab === "profile" && (
         <>
 
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm mb-6">
@@ -495,7 +549,9 @@ export default function ProfilePage() {
         </div>
       </div>
       </>
-      ) : (
+      )}
+      
+      {activeTab === "assets" && (
         <div className="space-y-6">
           <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
             <h3 className="text-lg font-bold text-[#2C2C2C] mb-6 flex items-center gap-2">
@@ -538,6 +594,101 @@ export default function ProfilePage() {
                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">Check with your HR administrator for hardware allocation.</p>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === "security" && (
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+          <div className="p-8">
+            <h3 className="text-lg font-bold text-[#2C2C2C] mb-6 flex items-center gap-2">
+              <ShieldCheck size={20} className="text-[#4A72FF]" />
+              Security Settings
+            </h3>
+            
+            <div className="max-w-md">
+              <p className="text-gray-500 text-sm mb-8">
+                Update your password to keep your account secure. We recommend using a strong password that you haven't used elsewhere.
+              </p>
+
+              {passwordError && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3 text-red-600 text-sm">
+                  <X size={18} className="mt-0.5 flex-shrink-0" />
+                  <p>{passwordError}</p>
+                </div>
+              )}
+
+              {passwordSuccess && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-100 rounded-xl flex items-start gap-3 text-green-700 text-sm">
+                  <ShieldCheck size={18} className="mt-0.5 flex-shrink-0" />
+                  <p>{passwordSuccess}</p>
+                </div>
+              )}
+
+              <form onSubmit={handlePasswordChange} className="space-y-6">
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Current Password</label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      value={passwordForm.currentPassword}
+                      onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4A72FF]/20 focus:border-[#4A72FF] transition-all pl-10 text-[#2C2C2C]"
+                      placeholder="Enter current password"
+                    />
+                    <KeyRound size={18} className="absolute left-3 top-3.5 text-gray-400" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">New Password</label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      value={passwordForm.newPassword}
+                      onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4A72FF]/20 focus:border-[#4A72FF] transition-all pl-10 text-[#2C2C2C]"
+                      placeholder="Enter new password"
+                    />
+                    <Lock size={18} className="absolute left-3 top-3.5 text-gray-400" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Confirm New Password</label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      value={passwordForm.confirmPassword}
+                      onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4A72FF]/20 focus:border-[#4A72FF] transition-all pl-10 text-[#2C2C2C]"
+                      placeholder="Confirm new password"
+                    />
+                    <Lock size={18} className="absolute left-3 top-3.5 text-gray-400" />
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <button
+                    type="submit"
+                    disabled={isChangingPassword}
+                    className="flex items-center gap-2 px-6 py-3 bg-[#2C2C2C] text-white rounded-xl font-bold text-sm tracking-wide hover:bg-black transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {isChangingPassword ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Updating Password...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={18} />
+                        Update Password
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

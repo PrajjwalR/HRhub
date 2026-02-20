@@ -73,7 +73,7 @@ export default function Sidebar() {
   return (
     <aside 
       ref={sidebarRef}
-      className={`min-h-screen border-r border-gray-100 flex flex-col items-start py-8 bg-white fixed left-0 top-0 z-50 transition-all duration-300 ${
+      className={`h-screen border-r border-gray-100 flex flex-col items-start py-8 bg-white fixed left-0 top-0 z-50 transition-all duration-300 shadow-sm ${
         isExpanded ? "w-72 px-6" : "w-20 px-0 items-center"
       }`}
     >
@@ -101,7 +101,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation Items */}
-      <div className="flex-1 flex flex-col gap-2 w-full">
+      <div className="flex-1 flex flex-col gap-2 w-full overflow-y-auto no-scrollbar pb-4">
         {navItems.map((item, index) => (
           <SidebarItem 
             key={index} 
@@ -115,49 +115,57 @@ export default function Sidebar() {
       </div>
 
       {/* User Profile */}
-      <div className={`mt-10 ${isExpanded ? "w-full" : "w-full flex justify-center"} relative`}>
-        <div className={isExpanded ? "w-full" : ""}>
+      <div className={`mt-auto w-full relative border-t border-gray-100 pt-4 bg-white`}>
+        <div className={isExpanded ? "w-full" : "flex justify-center"}>
           <div 
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className={`flex items-center gap-3 ${isExpanded ? "p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors" : "justify-center cursor-pointer"}`}
+            className={`flex items-center gap-3 ${isExpanded ? "p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors" : "justify-center cursor-pointer p-2 hover:bg-gray-50 rounded-xl transition-colors"}`}
           >
-            <div className="w-12 h-12 rounded-full bg-[#E5EDFF] flex items-center justify-center text-[#4A72FF] font-semibold text-sm border-2 border-white shadow-sm flex-shrink-0">
+            <div className="w-10 h-10 rounded-full bg-[#E5EDFF] flex items-center justify-center text-[#4A72FF] font-semibold text-xs border-2 border-white shadow-sm flex-shrink-0">
               {user?.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) || "JD"}
             </div>
             {isExpanded && (
-              <div className="flex-1">
-                <p className="font-bold text-[#2C2C2C] text-sm">{user?.name || "John Doe"}</p>
-                <p className="text-gray-400 text-xs capitalize">{user?.role || "Administrator"}</p>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-[#2C2C2C] text-sm truncate">{user?.name || "John Doe"}</p>
+                <p className="text-gray-400 text-xs capitalize truncate">{user?.role || "Administrator"}</p>
               </div>
             )}
           </div>
           
           {/* Dropdown Menu */}
           {showProfileMenu && (
-            <div className={`absolute ${isExpanded ? "bottom-full left-0 right-0 mb-2" : "bottom-full left-20 mb-2"} bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 min-w-[200px]`}>
+            <div className={`absolute ${isExpanded ? "bottom-full left-0 right-0 mb-4 mx-2" : "bottom-0 left-full ml-4 mb-0"} bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 min-w-[220px]`}>
+              <div className="px-4 py-3 border-b border-gray-50 mb-2">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Account</p>
+                <p className="text-sm font-bold text-[#2C2C2C] truncate">{user?.email}</p>
+              </div>
+              
               <a 
                 href="/profile" 
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-[#4A72FF] transition-colors"
                 onClick={() => setShowProfileMenu(false)}
               >
+                <Users size={16} />
                 View Profile
               </a>
               <a 
                 href="/my-payslips" 
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-[#4A72FF] transition-colors"
                 onClick={() => setShowProfileMenu(false)}
               >
+                <FileText size={16} />
                 My Payslips
               </a>
-              <div className="border-t border-gray-100 my-1"></div>
+              <div className="border-t border-gray-50 my-2"></div>
               <button
                 onClick={() => {
                   setShowProfileMenu(false);
                   logout();
                 }}
-                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                className="w-full flex items-center gap-3 text-left px-4 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors"
               >
-                Logout
+                <X size={16} />
+                Sign Out
               </button>
             </div>
           )}
