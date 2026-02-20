@@ -34,6 +34,7 @@ export default function ProfilePage() {
     company?: string;
     cell_number?: string;
     personal_email?: string;
+    uan?: string;
   } | null>(null);
   const [activeTab, setActiveTab] = useState<"profile" | "assets" | "security">("profile");
   const [assets, setAssets] = useState<any[]>([]);
@@ -57,6 +58,7 @@ export default function ProfilePage() {
     location: employeeData?.company || "-",
     department: employeeData?.department || "-",
     employeeId: employeeId || "-",
+    uan: employeeData?.uan || "-",
     joinDate: employeeData?.date_of_joining ? new Date(employeeData.date_of_joining).toLocaleDateString("en-IN", { year: "numeric", month: "short", day: "numeric" }) : "-",
     avatarColor: "bg-[#4A72FF]",
     avatarText: (employeeData?.employee_name || user?.name || "E").split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
@@ -83,6 +85,7 @@ export default function ProfilePage() {
               company: emp.company,
               cell_number: emp.cell_number,
               personal_email: emp.personal_email,
+              uan: emp.uan,
             });
             console.log("Found Employee:", emp.name, emp.employee_name);
           }
@@ -241,6 +244,72 @@ export default function ProfilePage() {
     }
   };
 
+  // Profile Edit State
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [editProfileData, setEditProfileData] = useState({
+    personal_email: "",
+    cell_number: "",
+    company: "",
+    department: "",
+    date_of_joining: "",
+    uan: ""
+  });
+  const [profileError, setProfileError] = useState<string | null>(null);
+
+  const handleEditProfile = () => {
+    setEditProfileData({
+      personal_email: employeeData?.personal_email || "",
+      cell_number: employeeData?.cell_number || "",
+      company: employeeData?.company || "",
+      department: employeeData?.department || "",
+      date_of_joining: employeeData?.date_of_joining || "",
+      uan: employeeData?.uan || ""
+    });
+    setIsEditingProfile(true);
+    setProfileError(null);
+  };
+
+  const handleCancelEditProfile = () => {
+    setIsEditingProfile(false);
+    setProfileError(null);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!employeeId) {
+      setProfileError("Employee ID not found.");
+      return;
+    }
+
+    setIsSavingProfile(true);
+    setProfileError(null);
+
+    try {
+      const response = await fetch("/api/employees", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          employeeId: employeeId,
+          ...editProfileData
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update profile");
+      }
+
+      // Update local state immediately
+      setEmployeeData((prev) => prev ? { ...prev, ...editProfileData } : null);
+      setIsEditingProfile(false);
+    } catch (err: any) {
+      console.error("Error saving profile details:", err);
+      setProfileError(err.message || "Failed to save profile details");
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
   return (
     <div className="p-8 max-w-4xl mx-auto pb-20">
       <div className="flex items-center justify-between mb-8">
@@ -283,10 +352,29 @@ export default function ProfilePage() {
           </div>
 
           {/* Header Info */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-[#2C2C2C] font-serif">{profileUser.name}</h2>
-            <p className="text-gray-500 font-medium">{profileUser.role}</p>
+          <div className="mb-8 flex justify-between items-start">
+            <div>
+              <h2 className="text-2xl font-bold text-[#2C2C2C] font-serif">{profileUser.name}</h2>
+              <p className="text-gray-500 font-medium">{profileUser.role}</p>
+            </div>
+            {!isEditingProfile && (
+              <button 
+                onClick={handleEditProfile}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#2C2C2C] border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                title="Only specific details can be edited."
+              >
+                <Edit2 size={14} />
+                Edit Profile
+              </button>
+            )}
           </div>
+
+          {profileError && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3 text-red-600 text-sm">
+              <X size={18} className="mt-0.5 flex-shrink-0" />
+              <p>{profileError}</p>
+            </div>
+          )}
 
           {/* Details Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -297,9 +385,18 @@ export default function ProfilePage() {
                 <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#4A72FF]">
                   <Mail size={18} />
                 </div>
-                <div>
-                  <p className="text-xs text-gray-400">Email Address</p>
-                  <p className="text-sm font-medium text-[#2C2C2C]">{profileUser.email}</p>
+                <div className="flex-1">
+                  <p className="text-xs text-gray-400 mb-1">Email Address</p>
+                  {isEditingProfile ? (
+                    <input
+                      type="email"
+                      value={editProfileData.personal_email}
+                      onChange={(e) => setEditProfileData({ ...editProfileData, personal_email: e.target.value })}
+                      className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-black focus:outline-none focus:border-[#4A72FF]"
+                    />
+                  ) : (
+                    <p className="text-sm font-medium text-[#2C2C2C]">{profileUser.email}</p>
+                  )}
                 </div>
               </div>
 
@@ -307,9 +404,18 @@ export default function ProfilePage() {
                 <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600">
                   <Phone size={18} />
                 </div>
-                <div>
-                  <p className="text-xs text-gray-400">Phone Number</p>
-                  <p className="text-sm font-medium text-[#2C2C2C]">{profileUser.phone}</p>
+                <div className="flex-1">
+                  <p className="text-xs text-gray-400 mb-1">Phone Number</p>
+                  {isEditingProfile ? (
+                    <input
+                      type="tel"
+                      value={editProfileData.cell_number}
+                      onChange={(e) => setEditProfileData({ ...editProfileData, cell_number: e.target.value })}
+                      className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-black focus:outline-none focus:border-[#4A72FF]"
+                    />
+                  ) : (
+                    <p className="text-sm font-medium text-[#2C2C2C]">{profileUser.phone}</p>
+                  )}
                 </div>
               </div>
 
@@ -317,9 +423,18 @@ export default function ProfilePage() {
                 <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500">
                   <MapPin size={18} />
                 </div>
-                <div>
-                  <p className="text-xs text-gray-400">Location</p>
-                  <p className="text-sm font-medium text-[#2C2C2C]">{profileUser.location}</p>
+                <div className="flex-1">
+                  <p className="text-xs text-gray-400 mb-1">Company / Location</p>
+                  {isEditingProfile ? (
+                    <input
+                      type="text"
+                      value={editProfileData.company}
+                      onChange={(e) => setEditProfileData({ ...editProfileData, company: e.target.value })}
+                      className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-black focus:outline-none focus:border-[#4A72FF]"
+                    />
+                  ) : (
+                    <p className="text-sm font-medium text-[#2C2C2C]">{profileUser.location}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -331,9 +446,18 @@ export default function ProfilePage() {
                 <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
                   <Building size={18} />
                 </div>
-                <div>
-                  <p className="text-xs text-gray-400">Department</p>
-                  <p className="text-sm font-medium text-[#2C2C2C]">{profileUser.department}</p>
+                <div className="flex-1">
+                  <p className="text-xs text-gray-400 mb-1">Department</p>
+                  {isEditingProfile ? (
+                    <input
+                      type="text"
+                      value={editProfileData.department}
+                      onChange={(e) => setEditProfileData({ ...editProfileData, department: e.target.value })}
+                      className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-black focus:outline-none focus:border-[#4A72FF]"
+                    />
+                  ) : (
+                    <p className="text-sm font-medium text-[#2C2C2C]">{profileUser.department}</p>
+                  )}
                 </div>
               </div>
 
@@ -351,13 +475,72 @@ export default function ProfilePage() {
                 <div className="w-10 h-10 rounded-full bg-pink-50 flex items-center justify-center text-pink-500">
                   <Calendar size={18} />
                 </div>
-                <div>
-                  <p className="text-xs text-gray-400">Date Joined</p>
-                  <p className="text-sm font-medium text-[#2C2C2C]">{profileUser.joinDate}</p>
+                <div className="flex-1">
+                  <p className="text-xs text-gray-400 mb-1">Date Joined</p>
+                  {isEditingProfile ? (
+                    <input
+                      type="date"
+                      value={editProfileData.date_of_joining}
+                      onChange={(e) => setEditProfileData({ ...editProfileData, date_of_joining: e.target.value })}
+                      className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-black focus:outline-none focus:border-[#4A72FF]"
+                    />
+                  ) : (
+                    <p className="text-sm font-medium text-[#2C2C2C]">{profileUser.joinDate}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+                  <Hash size={18} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs text-gray-400 mb-1">UAN Number</p>
+                  {isEditingProfile ? (
+                    <input
+                      type="text"
+                      maxLength={12}
+                      value={editProfileData.uan}
+                      onChange={(e) => setEditProfileData({ ...editProfileData, uan: e.target.value })}
+                      className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-black focus:outline-none focus:border-[#4A72FF]"
+                    />
+                  ) : (
+                    <p className="text-sm font-medium text-[#2C2C2C]">{profileUser.uan}</p>
+                  )}
                 </div>
               </div>
             </div>
           </div>
+
+          {isEditingProfile && (
+            <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-end gap-3">
+              <button 
+                onClick={handleCancelEditProfile}
+                disabled={isSavingProfile}
+                className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-xl transition-colors"
+              >
+                <X size={16} />
+                Cancel
+              </button>
+              <button 
+                onClick={handleSaveProfile}
+                disabled={isSavingProfile}
+                className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white bg-[#4A72FF] rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed shadow-md shadow-blue-200"
+              >
+                {isSavingProfile ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} />
+                    Save Changes
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
