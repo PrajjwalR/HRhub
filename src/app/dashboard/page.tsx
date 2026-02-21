@@ -5,12 +5,23 @@ import PayPeriodCalendar from "@/components/dashboard/PayPeriodCalendar";
 import ActivityLog from "@/components/dashboard/ActivityLog";
 import RequiredActions from "@/components/dashboard/RequiredActions";
 
+import PFReportDownloader from "@/components/PFReportDownloader";
+
 export default function DashboardPage() {
   return (
     <div className="p-8 max-w-[1600px] mx-auto">
       {/* Header */}
-      <header className="mb-8">
+      <header className="mb-8 flex justify-between items-start">
         <h1 className="text-[25px] font-serif text-[#2C2C2C]">Dashboard</h1>
+        
+        {/* Added PF Downloader Component Example */}
+        <div>
+          <PFReportDownloader 
+            payrollEntryId="HR-PR-2023-0001" 
+            month="October"
+            year="2023"
+          />
+        </div>
       </header>
 
       {/* Stats Cards */}
