@@ -216,8 +216,8 @@ export default function ProfilePage() {
       setPasswordError("Current password is required");
       return;
     }
-    if (passwordForm.newPassword.length < 6) {
-      setPasswordError("New password must be at least 6 characters long");
+    if (passwordForm.newPassword.length < 8) {
+      setPasswordError("New password must be at least 8 characters long");
       return;
     }
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
