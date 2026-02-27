@@ -159,10 +159,11 @@ export default function LeavesPage() {
               ))
             ) : balances.length > 0 ? (
               balances.map((balance, index) => {
+                const allocated = Number(balance.total_leaves_allocated) || 0;
                 const taken = leaves
                   .filter(l => l.leave_type === balance.leave_type && l.status.toLowerCase() === 'approved')
-                  .reduce((acc, curr) => acc + curr.total_leave_days, 0);
-                const remaining = balance.total_leaves_allocated - taken;
+                  .reduce((acc, curr) => acc + (Number(curr.total_leave_days) || 0), 0);
+                const remaining = allocated - taken;
                 
                 return (
                   <div key={index} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative group">
@@ -179,7 +180,7 @@ export default function LeavesPage() {
                         <h3 className="text-3xl font-bold text-[#2C2C2C]">{remaining}</h3>
                         <p className="text-xs text-gray-400 mt-1">
                           {balance.leave_type === "Sick Leave" 
-                            ? `days available (${balance.total_leaves_allocated} accrued)` 
+                            ? `days available (${allocated} accrued)` 
                             : "days remaining"}
                         </p>
                       </div>
@@ -192,14 +193,14 @@ export default function LeavesPage() {
                     <div className="mt-4 w-full bg-gray-100 h-1.5 rounded-full overflow-hidden relative">
                       <div 
                         className="bg-[#FF8C42] h-full rounded-full transition-all duration-1000"
-                        style={{ width: `${(remaining / (balance.leave_type === "Sick Leave" ? 18 : balance.total_leaves_allocated)) * 100}%` }}
+                        style={{ width: `${(remaining / (balance.leave_type === "Sick Leave" ? 18 : (allocated || 1))) * 100}%` }}
                       ></div>
                     </div>
 
                     {/* Accrual Info for Sick Leave */}
                     {balance.leave_type === "Sick Leave" && (
                       <div className="mt-2 text-[10px] text-gray-400 flex justify-between">
-                         <span>Running Total: {balance.total_leaves_allocated} / 18</span>
+                         <span>Running Total: {allocated} / 18</span>
                          <span>Next accrual: 1st of next month</span>
                       </div>
                     )}
