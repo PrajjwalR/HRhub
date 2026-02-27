@@ -56,7 +56,7 @@ export default function Sidebar() {
     { icon: LayoutGrid, href: "/dashboard", label: "Dashboard", roles: ["admin"] },
     { icon: Calculator, href: "/accounting", label: "Accounting", roles: ["admin"] },
     { icon: Wallet, href: "/payroll", label: "Payroll", roles: ["admin"] },
-    { icon: FileText, href: "/my-payslips", label: "My Payslips", roles: ["admin"] },
+    { icon: FileText, href: "/my-payslips", label: "My Payslips", roles: ["admin", "employee"] },
     { icon: CircleDollarSign, href: "/expenses", label: "Expenses", roles: ["admin"] },
     { icon: UserPlus, href: "/recruitment-onboarding", label: "Recruitment & Onboarding", roles: ["admin"] },
     { icon: Package, href: "/assets", label: "Assets Management", roles: ["admin"] },
