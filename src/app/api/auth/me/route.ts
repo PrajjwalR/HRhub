@@ -19,12 +19,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Role cannot be securely trusted from cookie if we strictly needed Authorization.
-    // However, since we simply need UI rendering speed, we can default to employee
-    // and let the backend enforce true security on data mutations. 
-    // If the email is known admin or hr, we give them admin UI access.
-    let role = "employee";
-    if (email === "hr@hr.com" || email.includes("admin")) {
+    // Read our fast local role cookie set during login
+    let role = cookies.user_role || "employee";
+    
+    // Fallback if cookie somehow got cleared but session is still active
+    if (!cookies.user_role && (email === "hr@hr.com" || email.includes("admin"))) {
         role = "admin";
     }
 

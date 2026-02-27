@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     // We already have the email, so we don't need to call get_logged_user! 
     // We can just query the User document immediately to get their role profile.
     const roleResponse = await fetch(
-      `${FRAPPE_URL}/api/resource/User/${email}?fields=["full_name","role_profile_name"]`,
+      `${FRAPPE_URL}/api/resource/User/${email}`,
       {
         method: "GET",
         headers: {
@@ -69,10 +69,16 @@ export async function POST(request: NextRequest) {
       const roleData = await roleResponse.json();
       fullName = roleData.data?.full_name || fullName;
       
-      // Determine role based on Frappe role profile
-      const roleProfile = roleData.data?.role_profile_name || "";
-      role = roleProfile.toLowerCase().includes("admin") || 
-             roleProfile.toLowerCase().includes("hr manager") 
+      // Determine role based on Frappe roles array or role profile
+      const roleProfile = (roleData.data?.role_profile_name || "").toLowerCase();
+      const rolesArray = roleData.data?.roles || [];
+      const hasAdminRole = rolesArray.some((r: any) => 
+        r.role === "System Manager" || 
+        r.role === "Administrator" || 
+        r.role === "HR Manager"
+      );
+
+      role = hasAdminRole || roleProfile.includes("admin") || roleProfile.includes("hr manager") 
              ? "admin" 
              : "employee";
     }
@@ -87,15 +93,22 @@ export async function POST(request: NextRequest) {
     console.log("Final user object:", user);
 
     // Set session cookie
-    const sessionCookie = response.headers.get("set-cookie");
+    const sessionCookieStr = response.headers.get("set-cookie");
     const nextResponse = NextResponse.json({ 
       success: true, 
       user 
     });
 
-    if (sessionCookie) {
-      nextResponse.headers.set("Set-Cookie", sessionCookie);
+    if (sessionCookieStr) {
+      // Split cookies by comma and space for reliable parsing
+      const cookies = response.headers.getSetCookie();
+      for (const cookie of cookies) {
+        nextResponse.headers.append("Set-Cookie", cookie);
+      }
     }
+    
+    // Add our fast local role cookie for instantaneous /api/auth/me checks without round trips
+    nextResponse.cookies.set("user_role", role, { path: "/", maxAge: 612000, sameSite: "lax" });
 
     return nextResponse;
   } catch (error: any) {
