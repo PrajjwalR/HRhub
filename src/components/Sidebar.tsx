@@ -91,10 +91,10 @@ export default function Sidebar() {
       <div className={`w-full flex ${isExpanded ? "justify-start px-3" : "justify-center"} mb-6`}>
         <div className="cursor-pointer flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl bg-[#FF8C42] flex items-center justify-center shadow-md flex-shrink-0">
-            <span className="text-white font-bold text-2xl font-serif">H</span>
+            <span className="text-white font-bold text-2xl font-serif">CHr</span>
           </div>
           {isExpanded && (
-            <span className="text-xl font-bold text-[#2C2C2C] font-serif">HRhub</span>
+            <span className="text-xl font-bold text-[#2C2C2C] font-serif">CacoHR</span>
           )}
         </div>
       </div>

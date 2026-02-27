@@ -36,9 +36,9 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-4">
             <div className="w-16 h-16 rounded-2xl bg-[#FF8C42] flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-3xl font-serif">H</span>
+              <span className="text-white font-bold text-3xl font-serif">CHr</span>
             </div>
-            <span className="text-3xl font-bold text-[#2C2C2C] font-serif">HRhub</span>
+            <span className="text-3xl font-bold text-[#2C2C2C] font-serif">CacoHR</span>
           </div>
           <p className="text-gray-500 text-sm">Sign in to your account</p>
         </div>
@@ -60,7 +60,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#4A72FF] focus:border-transparent outline-none transition-all text-gray-900"
-                  placeholder="admin@hrhub.com"
+                  placeholder="admin@cacohr.com"
                   required
                 />
               </div>

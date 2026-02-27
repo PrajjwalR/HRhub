@@ -216,7 +216,7 @@ export default function SystemSettings() {
                 </label>
                 <textarea 
                   rows={3}
-                  defaultValue="HRhub Inc., 123 Business Park, Tech City"
+                  defaultValue="CacoHR Inc., 123 Business Park, Tech City"
                   className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-slate-700 resize-none"
                 />
               </div>

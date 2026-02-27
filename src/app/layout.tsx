@@ -13,7 +13,7 @@ const hostGrotesk = Host_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "HRhub - Time & Attendance",
+  title: "CacoHR - Time & Attendance",
   description: "Modern HR Management System",
 };
 
