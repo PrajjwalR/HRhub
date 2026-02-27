@@ -46,32 +46,12 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
-    console.log("Frappe login success:", data);
+    console.log("Frappe login success");
 
-    // Get user details including role
-    const userResponse = await fetch(`${FRAPPE_URL}/api/method/frappe.auth.get_logged_user`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Cookie": response.headers.get("set-cookie") || "",
-      },
-      credentials: "include",
-    });
-
-    if (!userResponse.ok) {
-      console.error("Failed to get user details");
-      return NextResponse.json(
-        { error: "Failed to fetch user details" },
-        { status: 500 }
-      );
-    }
-
-    const userData = await userResponse.json();
-    console.log("User data:", userData);
-
-    // Get user role from Frappe
+    // We already have the email, so we don't need to call get_logged_user! 
+    // We can just query the User document immediately to get their role profile.
     const roleResponse = await fetch(
-      `${FRAPPE_URL}/api/resource/User/${email}?fields=["name","full_name","email","role_profile_name"]`,
+      `${FRAPPE_URL}/api/resource/User/${email}?fields=["full_name","role_profile_name"]`,
       {
         method: "GET",
         headers: {
@@ -87,7 +67,6 @@ export async function POST(request: NextRequest) {
 
     if (roleResponse.ok) {
       const roleData = await roleResponse.json();
-      console.log("Role data:", roleData);
       fullName = roleData.data?.full_name || fullName;
       
       // Determine role based on Frappe role profile

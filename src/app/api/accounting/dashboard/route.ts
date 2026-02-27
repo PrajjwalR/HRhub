@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+export const revalidate = 60; // Cache the dashboard response for 60 seconds
+
 export async function GET() {
   try {
     const API_KEY = process.env.FRAPPE_API_KEY;
