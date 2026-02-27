@@ -114,20 +114,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Demo Credentials */}
-          <div className="mt-6 pt-6 border-t border-gray-100">
-            <p className="text-xs text-gray-500 text-center mb-3">Demo Credentials:</p>
-            <div className="space-y-2 text-xs">
-              <div className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                <span className="text-gray-600">Admin:</span>
-                <code className="text-[#4A72FF] font-mono">admin@hrhub.com</code>
-              </div>
-              <div className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                <span className="text-gray-600">Employee:</span>
-                <code className="text-[#4A72FF] font-mono">employee@hrhub.com</code>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

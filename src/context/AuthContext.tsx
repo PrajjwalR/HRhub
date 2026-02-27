@@ -98,6 +98,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const isRedirecting =
+    !isLoading &&
+    ((!user && pathname !== "/login") || (user && pathname === "/login"));
+
+  if (isLoading || isRedirecting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA]">
+        <div className="w-16 h-16 relative">
+          <div className="absolute inset-0 rounded-full border-t-4 border-[#4A72FF] animate-spin"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
