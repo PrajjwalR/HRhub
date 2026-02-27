@@ -227,18 +227,31 @@ export default function ProfilePage() {
 
     setIsChangingPassword(true);
 
-    // Simulate API call (or implement real one if endpoint exists)
     try {
-      // For now, we'll simulate a delay and success
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // TODO: Replace with actual API call:
-      // await fetch('/api/user/change-password', { method: 'POST', ... });
+      if (!user?.email) {
+        throw new Error("Unable to determine user email");
+      }
+
+      const response = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: user.email,
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update password");
+      }
 
       setPasswordSuccess("Password updated successfully");
       setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (err: any) {
-      setPasswordError("Failed to update password. Please check your current password and try again.");
+      setPasswordError(err.message || "Failed to update password. Please check your current password and try again.");
     } finally {
       setIsChangingPassword(false);
     }
