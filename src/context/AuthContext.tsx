@@ -49,6 +49,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkSession();
   }, []);
 
+  // Define paths that are strictly for admins
+  const adminOnlyPaths = [
+    "/dashboard",
+    "/accounting",
+    "/payroll",
+    "/tax-compliance",
+    "/team",
+    "/settings"
+  ];
+  
+  // Define paths that both roles can access (excluding login/profile)
+  const sharedPaths = [
+    "/expenses",
+    "/recruitment-onboarding",
+    "/assets",
+    "/time-attendance",
+    "/leaves",
+    "/performance",
+    "/company",
+    "/my-payslips" // Admin could technically view this, or maybe it's just employee
+  ];
+
+  // Specific path restrictions
+  const isEmployeeRestricted = (path: string) => {
+    // If it's an admin only path, restricted for employees
+    if (adminOnlyPaths.some(p => path.startsWith(p))) return true;
+    
+    // Additional case: we agreed employees only see Profile and Company.
+    // If the path is not /profile, /company, or /my-payslips, restrict it.
+    if (!path.startsWith("/profile") && !path.startsWith("/company") && !path.startsWith("/my-payslips")) {
+      return true;
+    }
+    
+    return false;
+  };
+
   // Redirect logic
   useEffect(() => {
     if (!isLoading) {
@@ -56,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         router.push("/login");
       } else if (user && pathname === "/login") {
         router.push(user.role === "admin" ? "/dashboard" : "/profile");
-      } else if (user && user.role !== "admin" && pathname === "/dashboard") {
+      } else if (user && user.role !== "admin" && isEmployeeRestricted(pathname)) {
         router.push("/profile");
       }
     }
@@ -104,7 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     !isLoading &&
     ((!user && pathname !== "/login") || 
      (user && pathname === "/login") ||
-     (user && user.role !== "admin" && pathname === "/dashboard"));
+     (user && user.role !== "admin" && isEmployeeRestricted(pathname)));
 
   if (isLoading || isRedirecting) {
     return (
