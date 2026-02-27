@@ -93,27 +93,34 @@ export async function POST(request: NextRequest) {
     console.log("Final user object:", user);
 
     // Set session cookie
-    const sessionCookieStr = response.headers.get("set-cookie");
     const nextResponse = NextResponse.json({ 
       success: true, 
       user 
     });
 
-    if (sessionCookieStr) {
-      // Split cookies by comma and space for reliable parsing
-      const cookies = response.headers.getSetCookie();
-      for (let cookie of cookies) {
-        // Fix for localhost: Strip the 'Secure' flag if we are not on HTTPS
-        // Otherwise the browser will drop the session cookie on refresh
+    try {
+      // getSetCookie() returns an array of raw Set-Cookie strings from Frappe
+      const cookiesArray = response.headers.getSetCookie();
+      
+      for (let cookieStr of cookiesArray) {
+        // Fix for localhost: Strip strict security flags so the browser accepts 
+        // the cross-origin cookie on HTTP localhost
         if (process.env.NODE_ENV !== "production") {
-            cookie = cookie.replace(/;\s*Secure/i, "");
+            cookieStr = cookieStr.replace(/;\s*Secure/gi, "");
+            cookieStr = cookieStr.replace(/;\s*SameSite=(Strict|None)/gi, "; SameSite=Lax");
+            cookieStr = cookieStr.replace(/;\s*Domain=[^;]+/gi, "");
         }
-        nextResponse.headers.append("Set-Cookie", cookie);
+        nextResponse.headers.append("Set-Cookie", cookieStr);
       }
+    } catch (e) {
+      console.error("Failed to parse cookies from Frappe:", e);
     }
     
-    // Add our fast local role cookie for instantaneous /api/auth/me checks without round trips
+    // Set our own session cookies since Frappe does NOT forward sid/user_id
+    // when called from server-side Node.js fetch (only user_image is sent)
+    nextResponse.cookies.set("user_id", email, { path: "/", maxAge: 612000, sameSite: "lax" });
     nextResponse.cookies.set("user_role", role, { path: "/", maxAge: 612000, sameSite: "lax" });
+    nextResponse.cookies.set("full_name", fullName, { path: "/", maxAge: 612000, sameSite: "lax" });
 
     return nextResponse;
   } catch (error: any) {

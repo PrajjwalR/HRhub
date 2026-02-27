@@ -19,6 +19,8 @@ export async function POST(request: NextRequest) {
     nextResponse.cookies.delete("sid");
     nextResponse.cookies.delete("system_user");
     nextResponse.cookies.delete("user_id");
+    nextResponse.cookies.delete("user_role");
+    nextResponse.cookies.delete("full_name");
 
     return nextResponse;
   } catch (error: any) {

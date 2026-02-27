@@ -4,13 +4,12 @@ export async function GET(request: NextRequest) {
   try {
     const FRAPPE_URL = process.env.NEXT_PUBLIC_FRAPPE_URL || "http://localhost:8000";
 
-    // Parse the Frappe cookies directly to avoid slow round-trips
-    const cookieHeader = request.headers.get("cookie") || "";
-    const cookies = Object.fromEntries(
-      cookieHeader.split("; ").map(v => v.split(/=(.*)/).map(decodeURIComponent))
-    );
+    // Use NextRequest built-in cookies API for reliability
+    const allCookies = request.cookies.getAll();
+    console.log("=== /api/auth/me ===");
+    console.log("Cookies received:", allCookies);
 
-    const email = cookies.user_id;
+    const email = request.cookies.get("user_id")?.value;
 
     if (!email || email === "Guest") {
       return NextResponse.json(
@@ -20,14 +19,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Read our fast local role cookie set during login
-    let role = cookies.user_role || "employee";
+    let role = request.cookies.get("user_role")?.value || "employee";
     
     // Fallback if cookie somehow got cleared but session is still active
-    if (!cookies.user_role && (email === "hr@hr.com" || email.includes("admin"))) {
+    if (!request.cookies.has("user_role") && (email === "hr@hr.com" || email.includes("admin"))) {
         role = "admin";
     }
 
-    const fullName = cookies.full_name || email.split("@")[0];
+    const fullName = request.cookies.get("full_name")?.value || email.split("@")[0];
 
     return NextResponse.json({
       user: {
