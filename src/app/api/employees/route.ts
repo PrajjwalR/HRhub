@@ -6,14 +6,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("user_id");
     
-    let endpoint = "/api/resource/Employee?fields=[\"name\",\"employee_name\",\"designation\",\"department\",\"status\",\"image\",\"user_id\",\"date_of_joining\",\"company\",\"cell_number\",\"personal_email\",\"uan\"]&limit_page_length=20";
+    let endpoint = "/api/resource/Employee?fields=[\"name\",\"employee_name\",\"designation\",\"department\",\"status\",\"image\",\"user_id\",\"date_of_joining\",\"company\",\"cell_number\",\"personal_email\",\"uan\"]&limit_page_length=100";
     
     // If user_id is provided, filter by it (this links User to Employee)
     if (userId) {
-      endpoint = `/api/resource/Employee?filters=[["user_id","=","${userId}"]]&fields=["name","employee_name","designation","department","status","image","user_id","date_of_joining","company","cell_number","personal_email\",\"uan\"]&limit_page_length=1`;
-    }
-
-    
+      endpoint = `/api/resource/Employee?filters=[["user_id","=","${userId}"]]&fields=["name","employee_name","designation","department","status","image","user_id","date_of_joining","company","cell_number","personal_email","uan"]&limit_page_length=1`;
+    }    
     const data = await fetchFromFrappe(endpoint);
     
     console.log("Frappe API Response:", JSON.stringify(data, null, 2));

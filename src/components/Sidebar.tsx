@@ -19,6 +19,8 @@ import {
   ShieldCheck,
   Building2,
   Calculator,
+  Briefcase,
+  UserCheck,
   User
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
@@ -56,6 +58,7 @@ export default function Sidebar() {
     { icon: LayoutGrid, href: "/dashboard", label: "Dashboard", roles: ["admin"] },
     { icon: Calculator, href: "/accounting", label: "Accounting", roles: ["admin"] },
     { icon: Wallet, href: "/payroll", label: "Payroll", roles: ["admin"] },
+    { icon: Users, href: "/employees", label: "Employee Directory", roles: ["admin"] },
     { icon: User, href: "/profile", label: "Profile", roles: ["admin", "employee"] },
     { icon: FileText, href: "/my-payslips", label: "My Payslips", roles: ["admin", "employee"] },
     { icon: CircleDollarSign, href: "/expenses", label: "Expenses", roles: ["admin"] },
@@ -66,7 +69,7 @@ export default function Sidebar() {
     { icon: TrendingUp, href: "/performance", label: "Performance", roles: ["admin"] },
     { icon: Building2, href: "/company", label: "Company", roles: ["admin", "employee"] },
     { icon: ShieldCheck, href: "/tax-compliance", label: "Tax & Compliance", roles: ["admin"] },
-    { icon: Users, href: "/team", label: "Integrations", roles: ["admin"] },
+    { icon: UserCheck, href: "/team", label: "My Team", roles: ["admin"] },
     { icon: Settings, href: "/settings", label: "Settings", roles: ["admin"] },
   ];
 
