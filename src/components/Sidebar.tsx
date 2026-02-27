@@ -153,23 +153,7 @@ export default function Sidebar() {
                 <p className="text-sm font-bold text-[#2C2C2C] truncate">{user?.email}</p>
               </div>
               
-              <a 
-                href="/profile" 
-                className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-[#4A72FF] transition-colors"
-                onClick={() => setShowProfileMenu(false)}
-              >
-                <Users size={16} />
-                View Profile
-              </a>
-              <a 
-                href="/my-payslips" 
-                className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-[#4A72FF] transition-colors"
-                onClick={() => setShowProfileMenu(false)}
-              >
-                <FileText size={16} />
-                My Payslips
-              </a>
-              <div className="border-t border-gray-50 my-2"></div>
+              
               <button
                 onClick={() => {
                   setShowProfileMenu(false);
