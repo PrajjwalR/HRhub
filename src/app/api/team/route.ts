@@ -17,10 +17,27 @@ export async function GET(request: NextRequest) {
     );
     const isSuperAdmin = cookies.user_role === "admin";
 
-    // If super admin, fetch all active employees. Else, fetch specific direct reports.
+    // Fetch manager's company to scoped queries
+    let managerCompany = "";
+    if (isSuperAdmin && managerId) {
+      try {
+        const managerRes = await fetchFromFrappe(`/api/resource/Employee/${managerId}`);
+        if (managerRes.data && managerRes.data.company) {
+            managerCompany = managerRes.data.company;
+        }
+      } catch (e) {
+          console.error("Could not fetch manager company", e);
+      }
+    }
+
+    // If super admin, fetch all active employees in their company. Else, fetch specific direct reports.
     let endpoint = `/api/resource/Employee?filters=[["reports_to","=","${managerId}"]]&fields=["name","employee_name","designation","department"]&limit_page_length=100`;
     if (isSuperAdmin) {
-      endpoint = `/api/resource/Employee?filters=[["status","=","Active"]]&fields=["name","employee_name","designation","department"]&limit_page_length=100`;
+      if (managerCompany) {
+        endpoint = `/api/resource/Employee?filters=[["status","=","Active"],["company","=","${managerCompany}"]]&fields=["name","employee_name","designation","department"]&limit_page_length=100`;
+      } else {
+        endpoint = `/api/resource/Employee?filters=[["status","=","Active"]]&fields=["name","employee_name","designation","department"]&limit_page_length=100`;
+      }
     }
     
     const data = await fetchFromFrappe(endpoint);

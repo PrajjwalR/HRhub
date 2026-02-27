@@ -17,25 +17,40 @@ export async function GET(request: NextRequest) {
     );
     const isSuperAdmin = cookies.user_role === "admin";
 
-    // Step 1: Get subordinates if not super admin
+    // Step 1: Get subordinates or company employees
     let subordinateIds: string[] = [];
-    if (!isSuperAdmin) {
-      const subordinatesEndpoint = `/api/resource/Employee?filters=[["reports_to","=","${managerId}"]]&fields=["name"]`;
+    if (isSuperAdmin) {
+      // Get manager's company
+      let managerCompany = "";
+      try {
+        const managerRes = await fetchFromFrappe(`/api/resource/Employee/${managerId}?fields=["company"]`);
+        if (managerRes.data && managerRes.data.company) {
+            managerCompany = managerRes.data.company;
+        }
+      } catch (e) {
+          console.error("Could not fetch manager company", e);
+      }
+
+      let empEndpoint = `/api/resource/Employee?filters=[["status","=","Active"]]&fields=["name"]&limit_page_length=1000`;
+      if (managerCompany) {
+         empEndpoint = `/api/resource/Employee?filters=[["status","=","Active"],["company","=","${managerCompany}"]]&fields=["name"]&limit_page_length=1000`;
+      }
+      const allEmpData = await fetchFromFrappe(empEndpoint);
+      subordinateIds = allEmpData.data?.map((s: any) => s.name) || [];
+    } else {
+      const subordinatesEndpoint = `/api/resource/Employee?filters=[["reports_to","=","${managerId}"]]&fields=["name"]&limit_page_length=1000`;
       const subordinatesData = await fetchFromFrappe(subordinatesEndpoint);
       subordinateIds = subordinatesData.data?.map((s: any) => s.name) || [];
+    }
 
-      if (subordinateIds.length === 0) {
-        return NextResponse.json([]);
-      }
+    if (subordinateIds.length === 0) {
+      return NextResponse.json([]);
     }
 
     // Step 2: Get leave applications
     const fields = ["name", "employee", "employee_name", "leave_type", "from_date", "to_date", "total_leave_days", "status", "posting_date"];
     
-    // If Admin, fetch all active leaves. If Manager, fetch only subordinates' leaves.
-    const filters = isSuperAdmin 
-      ? [] // No filter, get all 
-      : [["employee", "in", subordinateIds]];
+    const filters = [["employee", "in", subordinateIds]];
     
     // We want to see Pending/Open leaves first
     const filterQuery = filters.length > 0 ? `&filters=${JSON.stringify(filters)}` : '';
