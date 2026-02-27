@@ -29,13 +29,19 @@ export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
   const pathname = usePathname();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      // Close sidebar if expanded and clicked outside
       if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node) && isExpanded) {
         setIsExpanded(false);
+      }
+      // Close profile menu if open and clicked outside
+      if (showProfileMenu && profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
       }
     }
 
@@ -43,7 +49,7 @@ export default function Sidebar() {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isExpanded]);
+  }, [isExpanded, showProfileMenu]);
 
   const allNavItems = [
     { icon: LayoutGrid, href: "/dashboard", label: "Dashboard", roles: ["admin", "employee"] },
@@ -117,10 +123,13 @@ export default function Sidebar() {
       </div>
 
       {/* User Profile */}
-      <div className={`mt-auto w-full relative border-t border-gray-100 pt-4 bg-white`}>
+      <div className={`mt-auto w-full relative border-t border-gray-100 pt-4 bg-white`} ref={profileMenuRef}>
         <div className={isExpanded ? "w-full" : "flex justify-center"}>
           <div 
-            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent immediate closing
+              setShowProfileMenu(!showProfileMenu);
+            }}
             className={`flex items-center gap-3 ${isExpanded ? "p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors" : "justify-center cursor-pointer p-2 hover:bg-gray-50 rounded-xl transition-colors"}`}
           >
             <div className="w-10 h-10 rounded-full bg-[#E5EDFF] flex items-center justify-center text-[#4A72FF] font-semibold text-xs border-2 border-white shadow-sm flex-shrink-0">
