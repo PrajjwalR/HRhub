@@ -17,7 +17,8 @@ import {
   TrendingUp,
   Package,
   ShieldCheck,
-  Building2
+  Building2,
+  Calculator
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
@@ -46,6 +47,7 @@ export default function Sidebar() {
 
   const allNavItems = [
     { icon: LayoutGrid, href: "/dashboard", label: "Dashboard", roles: ["admin", "employee"] },
+    { icon: Calculator, href: "/accounting", label: "Accounting", roles: ["admin", "employee"] },
     { icon: Wallet, href: "/payroll", label: "Payroll", roles: ["admin"] },
     { icon: FileText, href: "/my-payslips", label: "My Payslips", roles: ["employee"] },
     { icon: CircleDollarSign, href: "/expenses", label: "Expenses", roles: ["admin", "employee"] },
