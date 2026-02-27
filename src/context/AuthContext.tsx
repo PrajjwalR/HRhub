@@ -77,8 +77,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (adminOnlyPaths.some(p => path.startsWith(p))) return true;
     
     // Additional case: we agreed employees only see Profile and Company.
-    // If the path is not /profile, /company, or /my-payslips, restrict it.
-    if (!path.startsWith("/profile") && !path.startsWith("/company") && !path.startsWith("/my-payslips")) {
+    // If the path is not /profile, /company, /my-payslips, or /salary-slip, restrict it.
+    if (!path.startsWith("/profile") && !path.startsWith("/company") && !path.startsWith("/my-payslips") && !path.startsWith("/salary-slip")) {
       return true;
     }
     
