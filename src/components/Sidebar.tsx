@@ -18,7 +18,8 @@ import {
   Package,
   ShieldCheck,
   Building2,
-  Calculator
+  Calculator,
+  User
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
@@ -52,16 +53,17 @@ export default function Sidebar() {
   }, [isExpanded, showProfileMenu]);
 
   const allNavItems = [
-    { icon: LayoutGrid, href: "/dashboard", label: "Dashboard", roles: ["admin", "employee"] },
-    { icon: Calculator, href: "/accounting", label: "Accounting", roles: ["admin", "employee"] },
+    { icon: LayoutGrid, href: "/dashboard", label: "Dashboard", roles: ["admin"] },
+    { icon: Calculator, href: "/accounting", label: "Accounting", roles: ["admin"] },
     { icon: Wallet, href: "/payroll", label: "Payroll", roles: ["admin"] },
-    { icon: FileText, href: "/my-payslips", label: "My Payslips", roles: ["employee"] },
-    { icon: CircleDollarSign, href: "/expenses", label: "Expenses", roles: ["admin", "employee"] },
-    { icon: UserPlus, href: "/recruitment-onboarding", label: "Recruitment & Onboarding", roles: ["admin", "employee"] },
-    { icon: Package, href: "/assets", label: "Assets Management", roles: ["admin", "employee"] },
-    { icon: CalendarDays, href: "/time-attendance", label: "Time & Attendance", roles: ["admin", "employee"] },
-    { icon: CalendarCheck, href: "/leaves", label: "Leaves", roles: ["admin", "employee"] },
-    { icon: TrendingUp, href: "/performance", label: "Performance", roles: ["admin", "employee"] },
+    { icon: FileText, href: "/my-payslips", label: "My Payslips", roles: ["admin"] },
+    { icon: CircleDollarSign, href: "/expenses", label: "Expenses", roles: ["admin"] },
+    { icon: UserPlus, href: "/recruitment-onboarding", label: "Recruitment & Onboarding", roles: ["admin"] },
+    { icon: Package, href: "/assets", label: "Assets Management", roles: ["admin"] },
+    { icon: CalendarDays, href: "/time-attendance", label: "Time & Attendance", roles: ["admin"] },
+    { icon: CalendarCheck, href: "/leaves", label: "Leaves", roles: ["admin"] },
+    { icon: TrendingUp, href: "/performance", label: "Performance", roles: ["admin"] },
+    { icon: User, href: "/profile", label: "Profile", roles: ["admin", "employee"] },
     { icon: Building2, href: "/company", label: "Company", roles: ["admin", "employee"] },
     { icon: ShieldCheck, href: "/tax-compliance", label: "Tax & Compliance", roles: ["admin"] },
     { icon: Users, href: "/team", label: "Integrations", roles: ["admin"] },

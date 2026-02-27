@@ -55,7 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!user && pathname !== "/login") {
         router.push("/login");
       } else if (user && pathname === "/login") {
-        router.push("/dashboard");
+        router.push(user.role === "admin" ? "/dashboard" : "/profile");
+      } else if (user && user.role !== "admin" && pathname === "/dashboard") {
+        router.push("/profile");
       }
     }
   }, [user, pathname, isLoading, router]);
@@ -100,7 +102,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isRedirecting =
     !isLoading &&
-    ((!user && pathname !== "/login") || (user && pathname === "/login"));
+    ((!user && pathname !== "/login") || 
+     (user && pathname === "/login") ||
+     (user && user.role !== "admin" && pathname === "/dashboard"));
 
   if (isLoading || isRedirecting) {
     return (
