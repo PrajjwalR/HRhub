@@ -102,7 +102,12 @@ export async function POST(request: NextRequest) {
     if (sessionCookieStr) {
       // Split cookies by comma and space for reliable parsing
       const cookies = response.headers.getSetCookie();
-      for (const cookie of cookies) {
+      for (let cookie of cookies) {
+        // Fix for localhost: Strip the 'Secure' flag if we are not on HTTPS
+        // Otherwise the browser will drop the session cookie on refresh
+        if (process.env.NODE_ENV !== "production") {
+            cookie = cookie.replace(/;\s*Secure/i, "");
+        }
         nextResponse.headers.append("Set-Cookie", cookie);
       }
     }
