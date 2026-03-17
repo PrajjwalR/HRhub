@@ -16,7 +16,8 @@ import {
   Plus,
   X as CloseIcon,
   Loader2,
-  FileText
+  FileText,
+  Download
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import RightSidebar from "@/components/RightSidebar";
@@ -247,6 +248,10 @@ export default function RecruitmentOnboardingPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleDownloadOffer = (offerName: string) => {
+    window.open(`/api/offers/${encodeURIComponent(offerName)}/download`, "_blank");
   };
 
   const getStatusStyle = (status: string) => {
@@ -576,7 +581,14 @@ export default function RecruitmentOnboardingPage() {
                             </span>
                           </td>
                           <td className="px-6 py-5 text-right">
-                             <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><ChevronRight size={18} /></button>
+                            <button
+                              onClick={() => handleDownloadOffer(offer.name)}
+                              title="View & Print Offer Letter"
+                              className="flex items-center gap-1.5 ml-auto px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-100 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all"
+                            >
+                              <Download size={12} />
+                              Download PDF
+                            </button>
                           </td>
                         </tr>
                       ))
