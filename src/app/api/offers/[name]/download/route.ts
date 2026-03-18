@@ -38,15 +38,58 @@ export async function GET(
   // Fetch company details for the letterhead
   let companyAddress = "";
   let companyEmail = "";
+  let companyPhone = "";
+  const companyName = offer.company || "";
+
   try {
     const companyRes = await fetch(
-      `${FRAPPE_URL}/api/resource/Company/${encodeURIComponent(offer.company || "")}`,
+      `${FRAPPE_URL}/api/resource/Company/${encodeURIComponent(companyName)}`,
       { headers: { Authorization: authHeader } }
     );
     if (companyRes.ok) {
       const companyJson = await companyRes.json();
-      companyAddress = companyJson.data?.address || "";
-      companyEmail = companyJson.data?.email || "";
+      const company = companyJson.data;
+
+      companyEmail = company?.email || company?.company_email || "";
+      companyPhone = company?.phone_no || company?.phone || "";
+
+      // Fetch addresses linked to this Company via Dynamic Link (Company has no default_address in JSON)
+      const addrFilters = encodeURIComponent(
+        JSON.stringify([
+          ["Dynamic Link", "link_doctype", "=", "Company"],
+          ["Dynamic Link", "link_name", "=", companyName],
+        ])
+      );
+      const addrFields = encodeURIComponent(
+        JSON.stringify(["name", "address_line1", "address_line2", "city", "state", "pincode", "country", "is_primary_address"])
+      );
+      const addrRes = await fetch(
+        `${FRAPPE_URL}/api/resource/Address?filters=${addrFilters}&fields=${addrFields}&limit_page_length=10`,
+        { headers: { Authorization: authHeader } }
+      );
+
+      if (addrRes.ok) {
+        const addrData = await addrRes.json();
+        const addresses = addrData.data || [];
+        // Prefer primary (billing) address, else use first
+        const addr = addresses.find((a: { is_primary_address?: number }) => a.is_primary_address === 1)
+          || addresses[0];
+        if (addr) {
+          const parts = [
+            addr.address_line1,
+            addr.address_line2,
+            [addr.city, addr.state].filter(Boolean).join(", "),
+            [addr.pincode, addr.country].filter(Boolean).join(" "),
+          ]
+            .filter(Boolean)
+            .join("\n");
+          companyAddress = parts;
+        }
+      }
+
+      if (!companyAddress) {
+        companyAddress = company?.address || company?.registered_address || "";
+      }
     }
   } catch {
     // non-fatal, continue without company details
@@ -59,6 +102,8 @@ export async function GET(
         year: "numeric",
       })
     : new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+
+  const companyMetaText = [companyAddress, companyEmail, companyPhone].filter(Boolean).join("\n");
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -118,7 +163,7 @@ export async function GET(
     /* Header */
     .letterhead {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       margin-bottom: 48px;
       padding-bottom: 28px;
@@ -135,20 +180,29 @@ export async function GET(
       font-size: 11.5px;
       color: #7a6f63;
       margin-top: 4px;
-      line-height: 1.7;
+      line-height: 1.45;
+      white-space: pre-line;
     }
     .ref-block {
       text-align: right;
-      font-size: 11.5px;
+      font-size: 12px;
       color: #7a6f63;
-      line-height: 1.8;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      min-width: 180px;
     }
-    .ref-block .ref-id {
-      font-family: 'EB Garamond', serif;
-      font-size: 14px;
-      font-weight: 500;
+    .ref-block .date-label {
+      font-weight: 600;
+      color: #3a3530;
+      margin-right: 8px;
+      letter-spacing: 0.2px;
+    }
+    .ref-block .date-value {
+      font-weight: 600;
       color: #1a1a1a;
-      display: block;
+      letter-spacing: 0.2px;
     }
 
     /* Title */
@@ -205,6 +259,32 @@ export async function GET(
     .detail-item.full-width {
       grid-column: 1 / -1;
     }
+    
+    /* Simple details list (replaces details card) */
+    .details-list {
+      margin: 22px 0 26px;
+      padding: 14px 0;
+      border-top: 1px solid #f0ebe4;
+      border-bottom: 1px solid #f0ebe4;
+    }
+    .details-row {
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+      padding: 6px 0;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #3a3530;
+    }
+    .details-key {
+      font-weight: 700;
+      min-width: 160px;
+      color: #1a1a1a;
+    }
+    .details-val {
+      font-weight: 500;
+      color: #3a3530;
+    }
 
     /* Status badge */
     .status-badge {
@@ -231,11 +311,11 @@ export async function GET(
     .signature-block {
       margin-top: 56px;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: flex-end;
     }
     .sig-side {
-      width: 45%;
+      width: 55%;
     }
     .sig-line {
       border-bottom: 1.5px solid #1a1a1a;
@@ -290,11 +370,11 @@ export async function GET(
     <div class="letterhead">
       <div>
         <div class="company-name">${offer.company || "Company"}</div>
-        <div class="company-meta">${companyAddress || ""}${companyEmail ? `<br/>${companyEmail}` : ""}</div>
+        <div class="company-meta">${companyMetaText}</div>
       </div>
       <div class="ref-block">
-        <span class="ref-id">${offer.name}</span>
-        Date: ${formattedDate}
+        <span class="date-label">Date</span>
+        <span class="date-value">${formattedDate}</span>
       </div>
     </div>
 
@@ -312,68 +392,36 @@ export async function GET(
       the key terms of your employment with us.
     </p>
 
-    <!-- Details card -->
-    <div class="details-card">
-      <div class="detail-item">
-        <label>Applicant Name</label>
-        <span>${offer.applicant_name || "—"}</span>
+    <!-- Simple details list -->
+    <div class="details-list">
+      <div class="details-row">
+        <div class="details-key">Applicant Name</div>
+        <div class="details-val">- ${offer.applicant_name || "—"}</div>
       </div>
-      <div class="detail-item">
-        <label>Designation / Role</label>
-        <span>${offer.designation || "—"}</span>
+      <div class="details-row">
+        <div class="details-key">Designation / Role</div>
+        <div class="details-val">- ${offer.designation || "—"}</div>
       </div>
-      <div class="detail-item">
-        <label>Offer Date</label>
-        <span>${formattedDate}</span>
-      </div>
-      <div class="detail-item">
-        <label>Company</label>
-        <span>${offer.company || "—"}</span>
-      </div>
-      <div class="detail-item">
-        <label>Offer Status</label>
-        <span>
-          <span class="status-badge ${
-            (offer.status || "").toLowerCase().includes("accept") ? "status-accepted"
-            : (offer.status || "").toLowerCase().includes("reject") ? "status-rejected"
-            : "status-awaiting"
-          }">${offer.status || "Issued"}</span>
-        </span>
-      </div>
-      <div class="detail-item">
-        <label>Reference ID</label>
-        <span>${offer.name}</span>
+      <div class="details-row">
+        <div class="details-key">Offer Date</div>
+        <div class="details-val">- ${formattedDate}</div>
       </div>
     </div>
 
     <p class="body-text">
       We trust that you will find this opportunity both professionally rewarding and personally fulfilling.
-      Please review the terms carefully and sign below to indicate your acceptance of this offer.
-      Should you have any questions, do not hesitate to reach out to the HR team.
+      Please review the terms carefully. Should you have any questions, please reach out to us at <strong>hr@cortexus.ai</strong>.
     </p>
     <p class="body-text">
       We look forward to welcoming you as a valued member of our team and are excited about
       the contributions you will bring to <strong>${offer.company || "our organisation"}</strong>.
     </p>
 
-    <!-- Signature block -->
-    <div class="signature-block">
-      <div class="sig-side">
-        <div class="sig-line"></div>
-        <div class="sig-label">Authorised Signatory</div>
-        <div class="sig-name">${offer.company || "Organisation"}</div>
-      </div>
-      <div class="sig-side" style="text-align:right;">
-        <div class="sig-line"></div>
-        <div class="sig-label">Candidate Acceptance</div>
-        <div class="sig-name">${offer.applicant_name || "Candidate"}</div>
-      </div>
-    </div>
 
     <!-- Footer -->
     <div class="footer">
       This letter is issued in confidence and is intended solely for the named candidate.<br/>
-      ${offer.company || ""} &nbsp;·&nbsp; Ref: ${offer.name}
+      ${offer.company || ""}
     </div>
   </div>
 
