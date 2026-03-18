@@ -103,7 +103,20 @@ export async function GET(
       })
     : new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 
-  const companyMetaText = [companyAddress, companyEmail, companyPhone].filter(Boolean).join("\n");
+  const normalizedPhone = (() => {
+    const raw = (companyPhone || "").trim();
+    if (!raw) return "";
+    if (raw.startsWith("+")) return raw;
+    const digits = raw.replace(/[^\d]/g, "");
+    // If it's a 10-digit Indian number, prefix +91 for nicer display
+    if (digits.length === 10) return `+91 ${digits}`;
+    return raw;
+  })();
+
+  const companyMetaText = [companyAddress].filter(Boolean).join("\n");
+  const companyContactLine = [companyEmail ? `<a href="mailto:${companyEmail}">${companyEmail}</a>` : "", normalizedPhone]
+    .filter(Boolean)
+    .join(" | ");
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -183,6 +196,17 @@ export async function GET(
       line-height: 1.45;
       white-space: pre-line;
     }
+    .company-contact {
+      margin-top: 2px;
+      font-size: 11.5px;
+      color: #7a6f63;
+      line-height: 1.35;
+    }
+    .company-contact a {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(122, 111, 99, 0.35);
+    }
     .ref-block {
       text-align: right;
       font-size: 12px;
@@ -208,11 +232,53 @@ export async function GET(
     /* Title */
     .offer-title {
       font-family: 'EB Garamond', serif;
-      font-size: 34px;
-      font-weight: 400;
+      font-size: 36px;
+      font-weight: 600;
       color: #1a1a1a;
       margin-bottom: 6px;
       letter-spacing: -0.5px;
+      text-transform: uppercase;
+    }
+    .divider {
+      height: 1px;
+      background: #eee6db;
+      margin: 18px 0 22px;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #1a1a1a;
+      margin: 22px 0 10px;
+    }
+    .kv {
+      margin: 10px 0 16px;
+      padding: 0;
+      list-style: none;
+    }
+    .kv li {
+      margin: 6px 0;
+      font-size: 14px;
+      line-height: 1.8;
+      color: #3a3530;
+    }
+    .bullets {
+      margin: 10px 0 16px 18px;
+      padding: 0;
+    }
+    .bullets li {
+      margin: 6px 0;
+      font-size: 14px;
+      line-height: 1.8;
+      color: #3a3530;
+    }
+
+    .closing {
+      margin-top: 18px;
+    }
+    .closing strong {
+      display: block;
+      margin-top: 6px;
     }
     .offer-subtitle {
       font-size: 12px;
@@ -336,13 +402,18 @@ export async function GET(
 
     /* Footer */
     .footer {
-      margin-top: 64px;
-      padding-top: 20px;
+      margin-top: 34px;
+      padding-top: 16px;
       border-top: 1px solid #e5ddd2;
       font-size: 10.5px;
       color: #b0a090;
-      text-align: center;
+      text-align: left;
       line-height: 1.7;
+    }
+    .footer .company-right {
+      float: right;
+      font-weight: 700;
+      color: #b0a090;
     }
 
     @page {
@@ -371,6 +442,7 @@ export async function GET(
       <div>
         <div class="company-name">${offer.company || "Company"}</div>
         <div class="company-meta">${companyMetaText}</div>
+        ${companyContactLine ? `<div class="company-contact">${companyContactLine}</div>` : ""}
       </div>
       <div class="ref-block">
         <span class="date-label">Date</span>
@@ -379,7 +451,7 @@ export async function GET(
     </div>
 
     <!-- Title -->
-    <div class="offer-title">Letter of Offer</div>
+    <div class="offer-title">LETTER OF OFFER</div>
     <div class="offer-subtitle">Confidential &nbsp;·&nbsp; Employment Offer</div>
 
     <!-- Salutation -->
@@ -387,41 +459,69 @@ export async function GET(
       Dear <strong>${offer.applicant_name || "Candidate"}</strong>,
     </p>
     <p class="body-text">
-      We are delighted to extend this offer of employment to you at <strong>${offer.company || "our organisation"}</strong>.
-      After careful consideration, we are pleased to offer you the position outlined below. This letter sets out
-      the key terms of your employment with us.
+      This has reference to your application and subsequent interview process with us. We are pleased to offer you the position of
+      <strong>${offer.designation || "—"}</strong> at <strong>${offer.company || "Cortexus.ai"}</strong>.
+    </p>
+    <p class="body-text">
+      We are excited about the potential you bring and look forward to having you as part of our team. We hope that your journey with us will be both professionally rewarding and a great learning experience.
     </p>
 
-    <!-- Simple details list -->
-    <div class="details-list">
-      <div class="details-row">
-        <div class="details-key">Applicant Name</div>
-        <div class="details-val">- ${offer.applicant_name || "—"}</div>
-      </div>
-      <div class="details-row">
-        <div class="details-key">Designation / Role</div>
-        <div class="details-val">- ${offer.designation || "—"}</div>
-      </div>
-      <div class="details-row">
-        <div class="details-key">Offer Date</div>
-        <div class="details-val">- ${formattedDate}</div>
-      </div>
+    <div class="divider"></div>
+
+    <div class="section-title">Position Details</div>
+    <ul class="kv">
+      <li><strong>Applicant Name:</strong> ${offer.applicant_name || "—"}</li>
+      <li><strong>Designation / Role:</strong> ${offer.designation || "—"}</li>
+      <li><strong>Offer Date:</strong> ${formattedDate}</li>
+    </ul>
+
+    <div class="divider"></div>
+
+    <div class="section-title">Joining Details</div>
+    <p class="body-text">
+      The proposed start date of your internship will be communicated and mutually agreed upon.
+    </p>
+    <p class="body-text">
+      Please confirm your acceptance of this offer along with your joining date. In case you do not confirm or report on the agreed date, it will be deemed that you have declined this offer.
+    </p>
+
+    <div class="section-title">Internship Terms</div>
+    <p class="body-text">
+      Your internship with ${offer.company || "Cortexus.ai"} is intended to evaluate your skills, performance, and alignment with the organization. Based on your performance during this period, you may be considered for future opportunities with the company.
+    </p>
+    <p class="body-text">
+      Either party may choose to discontinue the engagement during the internship period with prior notice, as mutually discussed.
+    </p>
+
+    <div class="section-title">Confidentiality</div>
+    <p class="body-text">
+      During your association with ${offer.company || "Cortexus.ai"}, you may have access to confidential information, including but not limited to technical data, business strategies, and internal processes. You are expected to maintain strict confidentiality and not disclose any such information to external parties during or after your tenure.
+    </p>
+
+    <div class="section-title">Documentation</div>
+    <p class="body-text">At the time of joining, you may be required to submit the following documents:</p>
+    <ul class="bullets">
+      <li>Academic qualification documents and certificates</li>
+      <li>Government-issued ID proof (Aadhar, PAN, etc.)</li>
+      <li>Any other relevant documents as requested by HR</li>
+    </ul>
+
+    <p class="body-text">
+      We are confident that your skills and enthusiasm will be a valuable addition to our team. We look forward to working together and building great things.
+    </p>
+    <p class="body-text">
+      Please feel free to reach out to us at <strong><a href="mailto:hr@cortexus.ai">hr@cortexus.ai</a></strong> for any clarification.
+    </p>
+
+    <div class="closing">
+      <strong>Thanking you,</strong>
+      <strong>Team ${offer.company || "Cortexus.ai"}</strong>
     </div>
-
-    <p class="body-text">
-      We trust that you will find this opportunity both professionally rewarding and personally fulfilling.
-      Please review the terms carefully. Should you have any questions, please reach out to us at <strong>hr@cortexus.ai</strong>.
-    </p>
-    <p class="body-text">
-      We look forward to welcoming you as a valued member of our team and are excited about
-      the contributions you will bring to <strong>${offer.company || "our organisation"}</strong>.
-    </p>
-
 
     <!-- Footer -->
     <div class="footer">
-      This letter is issued in confidence and is intended solely for the named candidate.<br/>
-      ${offer.company || ""}
+      <span><i>This letter is issued in confidence and is intended solely for the named candidate.</i></span>
+      <span class="company-right">${offer.company || ""}</span>
     </div>
   </div>
 
